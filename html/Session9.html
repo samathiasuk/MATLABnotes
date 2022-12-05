@@ -1,0 +1,519 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>NNESMO: Session 9 - Solving non-linear PDEs</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-03-17"><meta name="DC.source" content="Session9.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>NNESMO: Session 9 - Solving non-linear PDEs</h1><!--introduction--><p>Prof Simon Mathias</p><p>Department of Engineering</p><p>Durham University</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">This session's learning objectives</a></li><li><a href="#2">The Burgers' equation (BE)</a></li><li><a href="#3">ETCS - Explicit time-stepping with central differences in space</a></li><li><a href="#4">ITBS - Implicit time-stepping with backward differences</a></li><li><a href="#5">The Newton iteration method</a></li><li><a href="#6">SITBS - Semi-implicit time-stepping with backward differences</a></li><li><a href="#7">Classroom Assignment</a></li></ul></div><h2>This session's learning objectives<a name="1"></a></h2><p>At the end of this session you should be able to:</p><div><ul><li>Derive multiple finite difference solutions for the Burgers' equation.</li><li>Appreciate the difficulty of specifying stability criteria for non-linear problems.</li><li>Solve non-linear partial differential equations (PDE) using a semi-implicit scheme.</li><li>Use a Newton iteration method to develop a fully implicit method for non-linear PDEs.</li><li>Solve non-linear PDEs using MATLAB's ODE solver, ODE15s.</li></ul></div><h2>The Burgers' equation (BE)<a name="2"></a></h2><p>The Burgers' equation (BE) represents a  fluid momentum conservation statement in the presence of neglible pressure changes and body forces. For a one-dimensional system, the BE can be written out as follows:</p><p><span class="MathJax_Preview"><img src="Session9_eq65615.png" alt="$$ \displaystyle \frac{\partial u}{\partial t}+u\frac{\partial u}{\partial x}-\nu\frac{\partial^2 u}{\partial x^2}=0 $$"></span><script type="math/tex"> \displaystyle \frac{\partial u}{\partial t}+u\frac{\partial u}{\partial x}-\nu\frac{\partial^2 u}{\partial x^2}=0 </script> ___(1a)</p><p>where <span class="MathJax_Preview"><img src="Session9_eq35435.png" alt="$u$"></span><script type="math/tex">u</script> [ <span class="MathJax_Preview"><img src="Session9_eq36613.png" alt="$\mathrm{LT}^{-1}$"></span><script type="math/tex">\mathrm{LT}^{-1}</script> ] is velocity,  <span class="MathJax_Preview"><img src="Session9_eq43551.png" alt="$x$"></span><script type="math/tex">x</script> [ <span class="MathJax_Preview"><img src="Session9_eq55931.png" alt="$\mathrm{L}$"></span><script type="math/tex">\mathrm{L}</script> ] is distance, <span class="MathJax_Preview"><img src="Session9_eq07064.png" alt="$t$"></span><script type="math/tex">t</script> [ <span class="MathJax_Preview"><img src="Session9_eq44261.png" alt="$\mathrm{T}$"></span><script type="math/tex">\mathrm{T}</script> ] is time and <span class="MathJax_Preview"><img src="Session9_eq69196.png" alt="$\nu$"></span><script type="math/tex">\nu</script> [ <span class="MathJax_Preview"><img src="Session9_eq68181.png" alt="$\mathrm{L}^2\mathrm{T}^{-1}$"></span><script type="math/tex">\mathrm{L}^2\mathrm{T}^{-1}</script> ] is dynamic viscosity.</p><p>The BE is interesting to study from a computational perspective because it represents a simple modification of the advection diffusion equation (ADE) such that a non-linear partial differential equation (PDE) is produced. Comparing Eq. (1a) with Eq. (1) from the previous session it can be seen that <span class="MathJax_Preview"><img src="Session9_eq65967.png" alt="$a=u$"></span><script type="math/tex">a=u</script> and <span class="MathJax_Preview"><img src="Session9_eq44362.png" alt="$b=\nu$"></span><script type="math/tex">b=\nu</script>. Non-linear forms of the ADE come about in the Earth sciences for a variety of different applications. For example, fluid flow through unsaturated porous media (the Richards' equation), or heat conduction through rock formations where the material properties (e.g., specific heat capacity and conductivity) have a strong dependence on temperature.</p><p>As will be seen subsequently, adding just a small amount of non-linearity to a PDE leads to the need for quite different treatment when seeking to develop numerical solutions using approximate techniques such as finite differences.</p><p>For the next few examples, the following initial and boundary conditions are considered:</p><p><span class="MathJax_Preview"><img src="Session9_eq65993.png" alt="$$ \begin{array}{lll} u=u_0, &amp; |x| \leq x_0, &amp; t=0\\ u=0, &amp; x_0< |x| \leq L, &amp; t=0\\ u=0, &amp; |x| = L, &amp; t&gt;0\\ \end{array} $$"></span><script type="math/tex"> \begin{array}{lll} u=u_0, & |x| \leq x_0, & t=0\\ u=0, & x_0< |x| \leq L, & t=0\\ u=0, & |x| = L, & t>0\\ \end{array} </script> ___(1b)</p><p>where <span class="MathJax_Preview"><img src="Session9_eq79048.png" alt="$u_0$"></span><script type="math/tex">u_0</script> [ <span class="MathJax_Preview"><img src="Session9_eq36613.png" alt="$\mathrm{LT}^{-1}$"></span><script type="math/tex">\mathrm{LT}^{-1}</script> ] is the initial velocity of a region of <span class="MathJax_Preview"><img src="Session9_eq47428.png" alt="$2x_0$"></span><script type="math/tex">2x_0</script> [ <span class="MathJax_Preview"><img src="Session9_eq55931.png" alt="$\mathrm{L}$"></span><script type="math/tex">\mathrm{L}</script> ] length and <span class="MathJax_Preview"><img src="Session9_eq14396.png" alt="$2L$"></span><script type="math/tex">2L</script> [ <span class="MathJax_Preview"><img src="Session9_eq55931.png" alt="$\mathrm{L}$"></span><script type="math/tex">\mathrm{L}</script> ] represents the distance between the  two boundary conditions.</p><p>For the special case where <span class="MathJax_Preview"><img src="Session9_eq83913.png" alt="$L\rightarrow \infty$"></span><script type="math/tex">L\rightarrow \infty</script>, the above system of equations can be solved exactly to obtain (McElwaine, 2016, pers. com.)</p><p><span class="MathJax_Preview"><img src="Session9_eq77788.png" alt="$$ \displaystyle  \frac{u}{u_0}=\left[1+\frac{\displaystyle\exp\left(\frac{x+x_0-u_0t/2}{2\nu/u_0}\right)     \mathrm{erfc}\left(\frac{x_0+x}{2\sqrt{\nu t}}\right)     +\exp\left(\frac{x-x_0-u_0t/2}{2\nu/u_0}\right)     \mathrm{erfc}\left(\frac{x_0-x}{2\sqrt{\nu t}}\right)}     {\displaystyle\mathrm{erfc}\left(\frac{x-x_0-u_0t}{2\sqrt{\nu t}}\right)         -\mathrm{erfc}\left(\frac{x+x_0-u_0t}{2\sqrt{\nu         t}}\right)}\right]^{-1} $$"></span><script type="math/tex"> \displaystyle  \frac{u}{u_0}=\left[1+\frac{\displaystyle\exp\left(\frac{x+x_0-u_0t/2}{2\nu/u_0}\right)     \mathrm{erfc}\left(\frac{x_0+x}{2\sqrt{\nu t}}\right)     +\exp\left(\frac{x-x_0-u_0t/2}{2\nu/u_0}\right)     \mathrm{erfc}\left(\frac{x_0-x}{2\sqrt{\nu t}}\right)}     {\displaystyle\mathrm{erfc}\left(\frac{x-x_0-u_0t}{2\sqrt{\nu t}}\right)         -\mathrm{erfc}\left(\frac{x+x_0-u_0t}{2\sqrt{\nu         t}}\right)}\right]^{-1} </script>  ___(1c)</p><p>To evaluate the analytical solution, type in the following code in a single script-file and save it in an appropriate place as "BurgersStudy.m".</p><pre class="language-matlab"><span class="keyword">function</span> BurgersStudy
+<span class="comment">%A sequence of different subfunctions to solve the Burgers' equation.</span>
+</pre><pre class="language-matlab"><span class="comment">%Define model parameters</span>
+nu=0.1; <span class="comment">%m^2/day</span>
+u0=1.2; <span class="comment">%m/day</span>
+x0=0.7; <span class="comment">%m</span>
+</pre><pre class="language-matlab"><span class="comment">%Define location of points for plotting</span>
+x=linspace(-4,6,100);
+<span class="comment">%Define values of time (days) to be used for plotting</span>
+t=[0.5 1 2 4 8];
+</pre><pre class="language-matlab"><span class="comment">%Evaluate the exact solution</span>
+uA=AnalSol(x,t,nu,u0,x0);
+</pre><pre class="language-matlab"><span class="comment">%Plot results</span>
+figure(1)
+hold <span class="string">off</span>
+plot(x,uA,<span class="string">'.'</span>)
+xlabel(<span class="string">'Distance (m)'</span>)
+ylabel(<span class="string">'Velocity (m/day)'</span>)
+<span class="keyword">for</span> n=1:numel(t)
+    MYlegend{n}=[num2str(t(n)) <span class="string">' days'</span>];
+<span class="keyword">end</span>
+legend(MYlegend,<span class="string">'location'</span>,<span class="string">'northwest'</span>)
+</pre><pre class="language-matlab"><span class="comment">%**********************************************************************</span>
+</pre><pre class="language-matlab"><span class="keyword">function</span> u=AnalSol(x,t,nu,u0,x0)
+<span class="comment">%Subfunction containing the analytical solution</span>
+[x,t]=ndgrid(x,t);
+x1=(x+x0-u0*t)./sqrt(4*nu*t);
+x2=(x-x0-u0*t)./sqrt(4*nu*t);
+x3=(x0+x)./sqrt(4*nu*t);
+x4=(x0-x)./sqrt(4*nu*t);
+c=u0/2/nu;
+T3=exp(c*(x+x0-u0*t/2));
+T4=exp(c*(x-x0-u0*t/2));
+u=u0./(1+(T3.*erfc(x3)+T4.*erfc(x4))./(erfc(x2)-erfc(x1)));
+</pre><p>The proceeding outline of this session is as follows. First a simple explicit time-stepping scheme for the Burgers' equation is devloped and  its stability requirement is assessed. Following on from this, a more stable implicit scheme is developed. However, because of the non-linearity in the Burgers' equation, the implicit scheme cannot be implemented directly. Therefore, the Newton iteration method is introduced as a methodology for iteratively solving the implicit scheme. Subsequently it is shown that the first iteration of the fully implicit scheme gives rise to an alternative unconditionally stable scheme, referred to as a semi-implicit scheme. Finally, there is a classroom assignment, which involves modifying code from "ADEStudy.m" (developed during the previous session) to evaluate the various possible finite difference schemes that can be used to solve the Burgers' equation.</p><h2>ETCS - Explicit time-stepping with central differences in space<a name="3"></a></h2><p>First we will develop an Euler explicit time-stepping scheme for the BE problem described above and use a central difference approximation for the <span class="MathJax_Preview"><img src="Session9_eq80180.png" alt="$\partial u/\partial x$"></span><script type="math/tex">\partial u/\partial x</script> term. Ignoring all the truncation errors associated with the Taylor expansions (discussed in the previous session), the BE can then be written as</p><p><span class="MathJax_Preview"><img src="Session9_eq16085.png" alt="$$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +u_{i,n}\left(\frac{u_{i+1,n}-u_{i-1,n}}&#xA;{2 \Delta x}\right)&#xA;-\nu\left(\frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta x^2}\right)=0 $$"></span><script type="math/tex"> \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +u_{i,n}\left(\frac{u_{i+1,n}-u_{i-1,n}}
+{2 \Delta x}\right)
+-\nu\left(\frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta x^2}\right)=0 </script></p><p>which can be rearranged to get</p><p><span class="MathJax_Preview"><img src="Session9_eq74935.png" alt="$$ u_{i,n+1}=A_{i,n} u_{i-1,n}+B_{i,n} u_{i,n} + C_{i,n} u_{i+1,n} $$"></span><script type="math/tex"> u_{i,n+1}=A_{i,n} u_{i-1,n}+B_{i,n} u_{i,n} + C_{i,n} u_{i+1,n} </script></p><p>where</p><p><span class="MathJax_Preview"><img src="Session9_eq28569.png" alt="$$ \displaystyle A_{i,n}=\frac{u_{i,n}\Delta t}{2 \Delta x}+\frac{\nu\Delta t}{\Delta x^2},&#xA;\quad&#xA;B_{i,n}=1-\frac{2\nu\Delta t}{\Delta x^2},&#xA;\quad&#xA;C_{i,n}=-\frac{u_{i,n}\Delta t}{2 \Delta x}+\frac{\nu\Delta t}{\Delta x^2} $$"></span><script type="math/tex"> \displaystyle A_{i,n}=\frac{u_{i,n}\Delta t}{2 \Delta x}+\frac{\nu\Delta t}{\Delta x^2},
+\quad
+B_{i,n}=1-\frac{2\nu\Delta t}{\Delta x^2},
+\quad
+C_{i,n}=-\frac{u_{i,n}\Delta t}{2 \Delta x}+\frac{\nu\Delta t}{\Delta x^2} </script></p><p>or alternatively it can be said that</p><p><span class="MathJax_Preview"><img src="Session9_eq40320.png" alt="$$ u_{i,n+1}=P_{i,n} u_{i-1,n}+Q_{i,n} u_{i,n} + R_{i,n} u_{i+1,n} $$"></span><script type="math/tex"> u_{i,n+1}=P_{i,n} u_{i-1,n}+Q_{i,n} u_{i,n} + R_{i,n} u_{i+1,n} </script></p><p>where</p><p><span class="MathJax_Preview"><img src="Session9_eq16092.png" alt="$$ \displaystyle P_{i,n}=\frac{\nu\Delta t}{\Delta x^2},&#xA;\quad&#xA;Q_{i,n}=1-\frac{2\nu\Delta t}{\Delta x^2}-\Delta t \left(\frac{u_{i+1,n}-u_{i-1,n}}{2 \Delta x}\right),&#xA;\quad&#xA;R_{i,n}=\frac{\nu\Delta t}{\Delta x^2} $$"></span><script type="math/tex"> \displaystyle P_{i,n}=\frac{\nu\Delta t}{\Delta x^2},
+\quad
+Q_{i,n}=1-\frac{2\nu\Delta t}{\Delta x^2}-\Delta t \left(\frac{u_{i+1,n}-u_{i-1,n}}{2 \Delta x}\right),
+\quad
+R_{i,n}=\frac{\nu\Delta t}{\Delta x^2} </script></p><p>Hereafter, both of the above schemes will be referred to as the ETCS scheme.</p><p>Recall that for numerical stability of explicit time-stepping schemes to be ensured, it is generally found that the coefficients, <span class="MathJax_Preview"><img src="Session9_eq06403.png" alt="$A_{i,n}$"></span><script type="math/tex">A_{i,n}</script>, <span class="MathJax_Preview"><img src="Session9_eq24649.png" alt="$B_{i,n}$"></span><script type="math/tex">B_{i,n}</script> and <span class="MathJax_Preview"><img src="Session9_eq04908.png" alt="$C_{i,n}$"></span><script type="math/tex">C_{i,n}</script> (or <span class="MathJax_Preview"><img src="Session9_eq49000.png" alt="$P_{i,n}$"></span><script type="math/tex">P_{i,n}</script>, <span class="MathJax_Preview"><img src="Session9_eq31390.png" alt="$Q_{i,n}$"></span><script type="math/tex">Q_{i,n}</script> and <span class="MathJax_Preview"><img src="Session9_eq31790.png" alt="$R_{i,n}$"></span><script type="math/tex">R_{i,n}</script>), need always to be positive. For the case when <span class="MathJax_Preview"><img src="Session9_eq35435.png" alt="$u$"></span><script type="math/tex">u</script>, <span class="MathJax_Preview"><img src="Session9_eq80180.png" alt="$\partial u/\partial x$"></span><script type="math/tex">\partial u/\partial x</script>, <span class="MathJax_Preview"><img src="Session9_eq69196.png" alt="$\nu$"></span><script type="math/tex">\nu</script>, <span class="MathJax_Preview"><img src="Session9_eq25872.png" alt="$\Delta x$"></span><script type="math/tex">\Delta x</script> and <span class="MathJax_Preview"><img src="Session9_eq48211.png" alt="$\Delta t$"></span><script type="math/tex">\Delta t</script> are positive, it follows that there are two stability criteria for these schemes:</p><p><span class="MathJax_Preview"><img src="Session9_eq51295.png" alt="$$ \displaystyle \mathrm{Cr_{eff}}\equiv \frac{\nu\Delta t}{\Delta x^2} +\frac{\Delta t}{2} \left(\frac{u_{i+1,n}-u_{i-1,n}}{2 \Delta x}\right)<0.5&#xA;\quad&#xA;\mathrm{and}&#xA;\quad&#xA;\mathrm{Pe_{eff}}\equiv  \frac{u_{i,n}\Delta x}{\nu }<2 $$"></span><script type="math/tex"> \displaystyle \mathrm{Cr_{eff}}\equiv \frac{\nu\Delta t}{\Delta x^2} +\frac{\Delta t}{2} \left(\frac{u_{i+1,n}-u_{i-1,n}}{2 \Delta x}\right)<0.5
+\quad
+\mathrm{and}
+\quad
+\mathrm{Pe_{eff}}\equiv  \frac{u_{i,n}\Delta x}{\nu }<2 </script></p><p>where <span class="MathJax_Preview"><img src="Session9_eq52099.png" alt="$\mathrm{Cr_{eff}}$"></span><script type="math/tex">\mathrm{Cr_{eff}}</script> and <span class="MathJax_Preview"><img src="Session9_eq64798.png" alt="$\mathrm{Pe_{eff}}$"></span><script type="math/tex">\mathrm{Pe_{eff}}</script> can be thought of as being an effective Courant number and effective Peclet number, respectively.</p><p>The issue here, which is common to most non-linear PDEs, is that it is not straightforward to specify a priori a <span class="MathJax_Preview"><img src="Session9_eq25872.png" alt="$\Delta x$"></span><script type="math/tex">\Delta x</script> and <span class="MathJax_Preview"><img src="Session9_eq48211.png" alt="$\Delta t$"></span><script type="math/tex">\Delta t</script> that will ensure stability of the system for the desired simulation duration.</p><p>Considering our experience from the previous session, it is postulated that an impliciting time-stepping scheme with a backward difference for the <span class="MathJax_Preview"><img src="Session9_eq80180.png" alt="$\partial u/\partial x$"></span><script type="math/tex">\partial u/\partial x</script> is likely to lead to an unconditionally stable scheme.</p><h2>ITBS - Implicit time-stepping with backward differences<a name="4"></a></h2><p>If we consider an Euler implicit time-stepping scheme and use a backward difference approximation for the <span class="MathJax_Preview"><img src="Session9_eq80180.png" alt="$\partial u/\partial x$"></span><script type="math/tex">\partial u/\partial x</script> term, ignoring all the truncation errors associated with the Taylor expansions, the BE can be written as</p><p><span class="MathJax_Preview"><img src="Session9_eq06237.png" alt="$$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t}&#xA;+u_{i,n+1}\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta&#xA;x}\right)-\nu\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta&#xA;x^2}\right)=0 $$"></span><script type="math/tex"> \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t}
++u_{i,n+1}\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta
+x}\right)-\nu\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta
+x^2}\right)=0 </script></p><p>which can be rearranged to get</p><p><span class="MathJax_Preview"><img src="Session9_eq74473.png" alt="$$ u_{i,n}=A_{i,n+1} u_{i-1,n+1}+B_{i,n+1} u_{i,n+1} + C_{i,n+1} u_{i+1,n+1} $$"></span><script type="math/tex"> u_{i,n}=A_{i,n+1} u_{i-1,n+1}+B_{i,n+1} u_{i,n+1} + C_{i,n+1} u_{i+1,n+1} </script> ___(3a)</p><p>where</p><p><span class="MathJax_Preview"><img src="Session9_eq02229.png" alt="$$ \displaystyle A_{i,n+1}=-\frac{u_{i,n+1}\Delta t}{ \Delta x}-\frac{\nu\Delta t}{\Delta x^2},&#xA;\quad&#xA;B_{i,n+1}=1+\frac{u_{i,n+1}\Delta t}{ \Delta x}+\frac{2\nu\Delta t}{\Delta x^2},&#xA;\quad&#xA;C_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2} $$"></span><script type="math/tex"> \displaystyle A_{i,n+1}=-\frac{u_{i,n+1}\Delta t}{ \Delta x}-\frac{\nu\Delta t}{\Delta x^2},
+\quad
+B_{i,n+1}=1+\frac{u_{i,n+1}\Delta t}{ \Delta x}+\frac{2\nu\Delta t}{\Delta x^2},
+\quad
+C_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2} </script></p><p>or alternatively it can be said that</p><p><span class="MathJax_Preview"><img src="Session9_eq10876.png" alt="$$ u_{i,n}=P_{i,n+1} u_{i-1,n+1}+Q_{i,n+1} u_{i,n+1} + R_{i,n+1} u_{i+1,n+1} $$"></span><script type="math/tex"> u_{i,n}=P_{i,n+1} u_{i-1,n+1}+Q_{i,n+1} u_{i,n+1} + R_{i,n+1} u_{i+1,n+1} </script></p><p>where</p><p><span class="MathJax_Preview"><img src="Session9_eq83506.png" alt="$$ \displaystyle P_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2},&#xA;\quad&#xA;Q_{i,n+1}=1+\Delta t\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta x}\right)+\frac{2\nu\Delta t}{\Delta x^2},&#xA;\quad&#xA;R_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2} $$"></span><script type="math/tex"> \displaystyle P_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2},
+\quad
+Q_{i,n+1}=1+\Delta t\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta x}\right)+\frac{2\nu\Delta t}{\Delta x^2},
+\quad
+R_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2} </script></p><p>Hereafter this scheme will be referred to as the ITBS scheme.</p><p>Recalling from the previous session, for implicit time-stepping schemes, the coefficients <span class="MathJax_Preview"><img src="Session9_eq28541.png" alt="$A_{i,n+1}$"></span><script type="math/tex">A_{i,n+1}</script> and <span class="MathJax_Preview"><img src="Session9_eq78830.png" alt="$C_{i,n+1}$"></span><script type="math/tex">C_{i,n+1}</script> (or <span class="MathJax_Preview"><img src="Session9_eq34197.png" alt="$P_{i,n+1}$"></span><script type="math/tex">P_{i,n+1}</script> and <span class="MathJax_Preview"><img src="Session9_eq11668.png" alt="$R_{i,n+1}$"></span><script type="math/tex">R_{i,n+1}</script>) need to be negative and the coefficents <span class="MathJax_Preview"><img src="Session9_eq22394.png" alt="$B_{i,n+1}$"></span><script type="math/tex">B_{i,n+1}</script> (or <span class="MathJax_Preview"><img src="Session9_eq73664.png" alt="$Q_{i,n+1}$"></span><script type="math/tex">Q_{i,n+1}</script>) need to be positive to ensure stability. Consequently, for the case when <span class="MathJax_Preview"><img src="Session9_eq35435.png" alt="$u$"></span><script type="math/tex">u</script>, <span class="MathJax_Preview"><img src="Session9_eq80180.png" alt="$\partial u/\partial x$"></span><script type="math/tex">\partial u/\partial x</script>, <span class="MathJax_Preview"><img src="Session9_eq69196.png" alt="$\nu$"></span><script type="math/tex">\nu</script>, <span class="MathJax_Preview"><img src="Session9_eq25872.png" alt="$\Delta x$"></span><script type="math/tex">\Delta x</script> and <span class="MathJax_Preview"><img src="Session9_eq48211.png" alt="$\Delta t$"></span><script type="math/tex">\Delta t</script> are positive, the ITBS scheme should be unconditionally stable. However, for the situation dicated by the boundary conditions given in Eq. (1b), even for positive <span class="MathJax_Preview"><img src="Session9_eq79048.png" alt="$u_0$"></span><script type="math/tex">u_0</script>, there will be a region where <span class="MathJax_Preview"><img src="Session9_eq30424.png" alt="$\partial u/\partial x<0$"></span><script type="math/tex">\partial u/\partial x<0</script>.</p><p>Despite the fact that ITBS does not appear to be unconditionally stable, it can be appreciated that this scheme is likely to be much more stable than the ETCS scheme.</p><p>However, recall that the <span class="MathJax_Preview"><img src="Session9_eq53374.png" alt="$\mathbf{A}$"></span><script type="math/tex">\mathbf{A}</script>, <span class="MathJax_Preview"><img src="Session9_eq68788.png" alt="$\mathbf{B}$"></span><script type="math/tex">\mathbf{B}</script> and <span class="MathJax_Preview"><img src="Session9_eq50346.png" alt="$\mathbf{C}$"></span><script type="math/tex">\mathbf{C}</script> vectors of coefficients represent the first, second and third diagonals of a tridiagonal Jacobian matrix, <span class="MathJax_Preview"><img src="Session9_eq11572.png" alt="$\mathbf{J}_{n+1}$"></span><script type="math/tex">\mathbf{J}_{n+1}</script>, defined by the formula</p><p><span class="MathJax_Preview"><img src="Session9_eq26670.png" alt="$$ \mathbf{u}_n=\mathbf{J}_{n+1} \mathbf{u}_{n+1} $$"></span><script type="math/tex"> \mathbf{u}_n=\mathbf{J}_{n+1} \mathbf{u}_{n+1} </script> ___(3b)</p><p>Another challenge here is that evaluation of <span class="MathJax_Preview"><img src="Session9_eq11572.png" alt="$\mathbf{J}_{n+1}$"></span><script type="math/tex">\mathbf{J}_{n+1}</script> also requires values from the <span class="MathJax_Preview"><img src="Session9_eq28934.png" alt="$\mathbf{u}_{n+1}$"></span><script type="math/tex">\mathbf{u}_{n+1}</script> vector. Consequently Eq. (3b) must be solved iteratively.</p><h2>The Newton iteration method<a name="5"></a></h2><p>The Newton iteration method (also referred to as the Newton-Raphson method), is a simple root finding algorithm often used to solve non-linear PDEs using implicit time-stepping schemes such as Eq. (3b) above.</p><p>The Newton iteration method for root finding can be simply derived as follows:</p><p>Consider a function, <span class="MathJax_Preview"><img src="Session9_eq37171.png" alt="$f(x)$"></span><script type="math/tex">f(x)</script>. It is desired to find a value, <span class="MathJax_Preview"><img src="Session9_eq38906.png" alt="$x_{\mathrm{root}}$"></span><script type="math/tex">x_{\mathrm{root}}</script>, such that <span class="MathJax_Preview"><img src="Session9_eq20683.png" alt="$f(x_{\mathrm{root}})=0$"></span><script type="math/tex">f(x_{\mathrm{root}})=0</script> (i.e., a root of <span class="MathJax_Preview"><img src="Session9_eq37171.png" alt="$f(x)$"></span><script type="math/tex">f(x)</script>) that is situated close to a value <span class="MathJax_Preview"><img src="Session9_eq69357.png" alt="$x_0$"></span><script type="math/tex">x_0</script>.</p><p>The equation for a line, <span class="MathJax_Preview"><img src="Session9_eq44020.png" alt="$y$"></span><script type="math/tex">y</script>, that lies tangent to <span class="MathJax_Preview"><img src="Session9_eq37171.png" alt="$f(x)$"></span><script type="math/tex">f(x)</script> at <span class="MathJax_Preview"><img src="Session9_eq38765.png" alt="$x=x_0$"></span><script type="math/tex">x=x_0</script> can be written as</p><p><span class="MathJax_Preview"><img src="Session9_eq61790.png" alt="$$ y = f'(x_0) (x-x_0) +f(x_0) $$"></span><script type="math/tex"> y = f'(x_0) (x-x_0) +f(x_0) </script> ___(4a)</p><p>A good estimate for a value of <span class="MathJax_Preview"><img src="Session9_eq95593.png" alt="$x_{root}$"></span><script type="math/tex">x_{root}</script>, which we will call <span class="MathJax_Preview"><img src="Session9_eq06004.png" alt="$x_1$"></span><script type="math/tex">x_1</script>, can be found by extrapolating the tangent equation, Eq. (4a), to <span class="MathJax_Preview"><img src="Session9_eq51979.png" alt="$y=0$"></span><script type="math/tex">y=0</script>, i.e.:</p><p><span class="MathJax_Preview"><img src="Session9_eq68117.png" alt="$$ 0 = f'(x_0) (x_1-x_0) +f(x_0) $$"></span><script type="math/tex"> 0 = f'(x_0) (x_1-x_0) +f(x_0) </script></p><p>which can be rearranged to get</p><p><span class="MathJax_Preview"><img src="Session9_eq76307.png" alt="$$ x_1 = x_0 - f(x_0) / f'(x_0) $$"></span><script type="math/tex"> x_1 = x_0 - f(x_0) / f'(x_0) </script></p><p>from which it can be envisaged that a progressively closer estimate of <span class="MathJax_Preview"><img src="Session9_eq95593.png" alt="$x_{root}$"></span><script type="math/tex">x_{root}</script> can be obtained from the recursive relationship</p><p><span class="MathJax_Preview"><img src="Session9_eq55418.png" alt="$$ x_{m+1} = x_m - f(x_m) / f'(x_m) $$"></span><script type="math/tex"> x_{m+1} = x_m - f(x_m) / f'(x_m) </script> ___(4b)</p><p>where <span class="MathJax_Preview"><img src="Session9_eq81831.png" alt="$m$"></span><script type="math/tex">m</script> denotes the number of iterations that have been undertaken.</p><p>The above system can also be used to solve systems of non-linear equations such as Eq. (3b). In this case it is desired to find the roots of the vector, <span class="MathJax_Preview"><img src="Session9_eq47910.png" alt="$\mathbf{F}_{n+1,m}$"></span><script type="math/tex">\mathbf{F}_{n+1,m}</script>, where <span class="MathJax_Preview"><img src="Session9_eq81831.png" alt="$m$"></span><script type="math/tex">m</script> denotes results from the m-th iteration, which satisfies</p><p><span class="MathJax_Preview"><img src="Session9_eq37794.png" alt="$$  \mathbf{F}_{n+1,m} = \mathbf{u}_n-\mathbf{J}_{n+1,m} \mathbf{u}_{n+1,m} $$"></span><script type="math/tex">  \mathbf{F}_{n+1,m} = \mathbf{u}_n-\mathbf{J}_{n+1,m} \mathbf{u}_{n+1,m} </script></p><p>from which it can be seen that</p><p><span class="MathJax_Preview"><img src="Session9_eq26257.png" alt="$$\displaystyle \frac{\partial \mathbf{F}_{n+1,m}}{\partial \mathbf{u}_{n+1,m}} =-\mathbf{J}_{n+1,m}$$"></span><script type="math/tex">\displaystyle \frac{\partial \mathbf{F}_{n+1,m}}{\partial \mathbf{u}_{n+1,m}} =-\mathbf{J}_{n+1,m}</script></p><p>Further consideration of Eq. (4b) then suggests that a progressively closer estimate of <span class="MathJax_Preview"><img src="Session9_eq28934.png" alt="$\mathbf{u}_{n+1}$"></span><script type="math/tex">\mathbf{u}_{n+1}</script> can be obtained from</p><p><span class="MathJax_Preview"><img src="Session9_eq01718.png" alt="$$ \mathbf{u}_{n+1,m+1} = \mathbf{u}_{n+1,m} +\mathbf{J}_{n+1,m}^{-1} [\mathbf{u}_n-\mathbf{J}_{n+1,m} \mathbf{u}_{n+1,m}] $$"></span><script type="math/tex"> \mathbf{u}_{n+1,m+1} = \mathbf{u}_{n+1,m} +\mathbf{J}_{n+1,m}^{-1} [\mathbf{u}_n-\mathbf{J}_{n+1,m} \mathbf{u}_{n+1,m}] </script></p><p>which reduces to</p><p><span class="MathJax_Preview"><img src="Session9_eq80209.png" alt="$$ \mathbf{u}_{n+1,m+1} = \mathbf{J}_{n+1,m}^{-1} \mathbf{u}_n $$"></span><script type="math/tex"> \mathbf{u}_{n+1,m+1} = \mathbf{J}_{n+1,m}^{-1} \mathbf{u}_n </script> ___(4c)</p><p>where <span class="MathJax_Preview"><img src="Session9_eq38571.png" alt="$\mathbf{J}_{n+1,m}$"></span><script type="math/tex">\mathbf{J}_{n+1,m}</script> is the Jacobian matrix (as defined in Eq. (3b)) as determined assuming <span class="MathJax_Preview"><img src="Session9_eq78535.png" alt="$\mathbf{u}_{n+1}=\mathbf{u}_{n+1,m}$"></span><script type="math/tex">\mathbf{u}_{n+1}=\mathbf{u}_{n+1,m}</script>.</p><p>A good starting point is to try <span class="MathJax_Preview"><img src="Session9_eq71430.png" alt="$\mathbf{u}_{n+1,0}=\mathbf{u}_{n}$"></span><script type="math/tex">\mathbf{u}_{n+1,0}=\mathbf{u}_{n}</script>.</p><p>The iterative process should proceed until the scheme has achieved an acceptable level of local convergence. A suitable criterion for the accepting of <span class="MathJax_Preview"><img src="Session9_eq98526.png" alt="$\mathbf{u}_{n+1,m}$"></span><script type="math/tex">\mathbf{u}_{n+1,m}</script> as a good enough approximation of <span class="MathJax_Preview"><img src="Session9_eq28934.png" alt="$\mathbf{u}_{n+1}$"></span><script type="math/tex">\mathbf{u}_{n+1}</script> can be written as follows:</p><p><span class="MathJax_Preview"><img src="Session9_eq21362.png" alt="$$\displaystyle \left|1 - \frac{u_{i,n+1,m}}{u_{i,n+1,m+1}}\right| < 10^{-6}, \quad i=1\ldots N_x$$"></span><script type="math/tex">\displaystyle \left|1 - \frac{u_{i,n+1,m}}{u_{i,n+1,m+1}}\right| < 10^{-6}, \quad i=1\ldots N_x</script></p><p>where <span class="MathJax_Preview"><img src="Session9_eq81641.png" alt="$N_x$"></span><script type="math/tex">N_x</script> denotes the number of points that <span class="MathJax_Preview"><img src="Session9_eq43551.png" alt="$x$"></span><script type="math/tex">x</script> has been discretised into.</p><h2>SITBS - Semi-implicit time-stepping with backward differences<a name="6"></a></h2><p>Note that if only one iteration of the above scheme is considered we have</p><p><span class="MathJax_Preview"><img src="Session9_eq81669.png" alt="$$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t}&#xA;+u_{i,n}\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta&#xA;x}\right)-\nu\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta&#xA;x^2}\right)=0 $$"></span><script type="math/tex"> \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t}
++u_{i,n}\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta
+x}\right)-\nu\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta
+x^2}\right)=0 </script></p><p>which can be rearranged to get</p><p><span class="MathJax_Preview"><img src="Session9_eq74473.png" alt="$$ u_{i,n}=A_{i,n+1} u_{i-1,n+1}+B_{i,n+1} u_{i,n+1} + C_{i,n+1} u_{i+1,n+1} $$"></span><script type="math/tex"> u_{i,n}=A_{i,n+1} u_{i-1,n+1}+B_{i,n+1} u_{i,n+1} + C_{i,n+1} u_{i+1,n+1} </script> ___(5a)</p><p>where</p><p><span class="MathJax_Preview"><img src="Session9_eq03863.png" alt="$$ \displaystyle A_{i,n+1}=-\frac{u_{i,n}\Delta t}{ \Delta x}-\frac{\nu\Delta t}{\Delta x^2},&#xA;\quad&#xA;B_{i,n+1}=1+\frac{u_{i,n}\Delta t}{ \Delta x}+\frac{2\nu\Delta t}{\Delta x^2},&#xA;\quad&#xA;C_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2} $$"></span><script type="math/tex"> \displaystyle A_{i,n+1}=-\frac{u_{i,n}\Delta t}{ \Delta x}-\frac{\nu\Delta t}{\Delta x^2},
+\quad
+B_{i,n+1}=1+\frac{u_{i,n}\Delta t}{ \Delta x}+\frac{2\nu\Delta t}{\Delta x^2},
+\quad
+C_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2} </script></p><p>which, providing <span class="MathJax_Preview"><img src="Session9_eq84332.png" alt="$u_{i,n}&gt;0$"></span><script type="math/tex">u_{i,n}>0</script>, can be seen to be unconditionally stable.</p><p>This scheme should be hereafter referred to as SITBS.</p><p>Such a scheme is often referred to as a semi-implicit scheme or a mixed implicit and explicit scheme because it is implicit in the sense that Eq. (5a) cannot be solved explicitly for <span class="MathJax_Preview"><img src="Session9_eq83280.png" alt="$u_{i,n+1}$"></span><script type="math/tex">u_{i,n+1}</script>, but explicit in terms of the fact that the <span class="MathJax_Preview"><img src="Session9_eq84771.png" alt="$u_i$"></span><script type="math/tex">u_i</script> terms in the <span class="MathJax_Preview"><img src="Session9_eq06403.png" alt="$A_{i,n}$"></span><script type="math/tex">A_{i,n}</script> and <span class="MathJax_Preview"><img src="Session9_eq24649.png" alt="$B_{i,n}$"></span><script type="math/tex">B_{i,n}</script> coefficients are taken from the previous time-step. Such schemes are often implemented as a simple alternative to  fully implicit schemes in practice.</p><h2>Classroom Assignment<a name="7"></a></h2><p>1) Modify the code developed in ADEStudy.m (developed during the previous session) to add an appropriate subfunction to BurgersStudy.m to solve the problem described by Eqs. (1a) and (1b) using the SITBS scheme and compare your results to the analytical solution given in Eq. (1c). Try using <span class="MathJax_Preview"><img src="Session9_eq51446.png" alt="$\Delta x=0.02$"></span><script type="math/tex">\Delta x=0.02</script> m and <span class="MathJax_Preview"><img src="Session9_eq20236.png" alt="$\Delta t=0.25$"></span><script type="math/tex">\Delta t=0.25</script> days. Take special care when incorporating the <span class="MathJax_Preview"><img src="Session9_eq53374.png" alt="$\mathbf{A}$"></span><script type="math/tex">\mathbf{A}</script>, <span class="MathJax_Preview"><img src="Session9_eq68788.png" alt="$\mathbf{B}$"></span><script type="math/tex">\mathbf{B}</script> and <span class="MathJax_Preview"><img src="Session9_eq50346.png" alt="$\mathbf{C}$"></span><script type="math/tex">\mathbf{C}</script> vectors into your Jacobian matrix using <tt>spdiags</tt>. Check the help documentation for <tt>spdiags</tt> to be sure.</p><p>2) Modify your SITBS scheme further to obtain the ITBS scheme using the Newton iteration method described above. Specify a maximum number of iterations of 100. How many iterations are required for convergence? How much more accurate is ITBS as compared SITBS?</p><p>3) Solve the same problem using <tt>ODE15s</tt> with backward differencing. Note that specifying the Jacobian pattern (as we did in previous sessions) should lead to a considerable CPU time saving. How does this solution compare to ITBS? What happens if you set <span class="MathJax_Preview"><img src="Session9_eq84850.png" alt="$\nu=0.01$"></span><script type="math/tex">\nu=0.01</script> <span class="MathJax_Preview"><img src="Session9_eq42250.png" alt="$\mathrm{m}^2\mathrm{day}^{-1}$"></span><script type="math/tex">\mathrm{m}^2\mathrm{day}^{-1}</script> ? Try using <tt>tic</tt> and <tt>toc</tt> (see help documentation) to determine which of your approximate solutions is most efficient? What happens if you use a central differencing scheme instead?</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% NNESMO: Session 9 - Solving non-linear PDEs
+%
+% Dr Simon A Mathias
+%
+% Department of Earth Sciences
+%
+% Durham University
+%
+%% This session's learning objectives
+%
+% At the end of this session you should be able to:
+%
+% * Derive multiple finite difference solutions for the Burgers'
+% equation.
+% * Appreciate the difficulty of specifying stability criteria for non-linear problems.
+% * Solve non-linear partial differential equations (PDE) using a semi-implicit scheme.
+% * Use a Newton iteration method to develop a fully implicit method for non-linear PDEs.
+% * Solve non-linear PDEs using MATLAB's ODE solver, ODE15s.
+%
+%% The Burgers' equation (BE)
+%
+% The Burgers' equation (BE) represents a  fluid momentum conservation statement
+% in the presence of neglible pressure changes and body forces. 
+% For a one-dimensional system, the BE can be written out as follows:
+%
+% $$ \displaystyle \frac{\partial u}{\partial t}+u\frac{\partial u}{\partial
+% x}-\nu\frac{\partial^2 u}{\partial x^2}=0 $$ _____(1a)
+%
+% where $u$ [ $\mathrm{LT}^{-1}$ ] is velocity,  $x$ [ $\mathrm{L}$ ] is distance,
+% $t$ [ $\mathrm{T}$ ] is time and $\nu$ [ $\mathrm{L}^2\mathrm{T}^{-1}$ ] is dynamic viscosity.
+%
+% The BE is interesting to study from a computational perspective because
+% it represents a simple modification of the advection diffusion equation (ADE)
+% such that a non-linear partial differential equation (PDE) is produced. 
+% Comparing Eq. (1a) with Eq. (1) from the previous session it can be seen that  
+% $a=u$ and $b=\nu$. Non-linear forms of the ADE come about in the Earth
+% sciences for a variety of different applications. For example, fluid flow
+% through unsaturated porous media (the Richards' equation), or heat
+% conduction through rock formations where the material properties (e.g.,
+% specific heat capacity and conductivity) have a strong dependence on
+% temperature.
+%
+% As will be seen subsequently, adding just a small amount of non-linearity to
+% a PDE leads to the need for quite different treatment when seeking to
+% develop numerical solutions using approximate techniques such as finite
+% differences.
+%
+% For the next few examples, the following initial and boundary conditions
+% are considered:
+%
+% $$ \begin{array}{lll}
+% u=u_0, & |x| \leq x_0, & t=0\\
+% u=0, & x_0< |x| \leq L, & t=0\\
+% u=0, & |x| = L, & t>0\\
+% \end{array} $$ _____(1b)
+%
+% where $u_0$ [ $\mathrm{LT}^{-1}$ ] is the initial velocity of a region of
+% $2x_0$ [ $\mathrm{L}$ ] length and $2L$ [ $\mathrm{L}$ ] represents the
+% distance between the  two boundary conditions.
+%
+% For the special case where $L\rightarrow \infty$, the above system of
+% equations can be solved exactly to obtain (McElwaine, 2016, pers. com.)
+%
+% $$ \displaystyle  \frac{u}{u_0}=\left[1+\frac{\displaystyle\exp\left(\frac{x+x_0-u_0t/2}{2\nu/u_0}\right)
+%     \mathrm{erfc}\left(\frac{x_0+x}{2\sqrt{\nu t}}\right)
+%     +\exp\left(\frac{x-x_0-u_0t/2}{2\nu/u_0}\right)
+%     \mathrm{erfc}\left(\frac{x_0-x}{2\sqrt{\nu t}}\right)}
+%     {\displaystyle\mathrm{erfc}\left(\frac{x-x_0-u_0t}{2\sqrt{\nu t}}\right)
+%         -\mathrm{erfc}\left(\frac{x+x_0-u_0t}{2\sqrt{\nu
+%         t}}\right)}\right]^{-1} $$  _____(1c)
+%
+% To evaluate the analytical solution, type in the following code in a single 
+% script-file and save it in an appropriate place as "BurgersStudy.m".
+%
+%   function BurgersStudy
+%   %A sequence of different subfunctions to solve the Burgers' equation.
+%   
+%   %Define model parameters
+%   nu=0.1; %m^2/day
+%   u0=1.2; %m/day
+%   x0=0.7; %m
+%
+%   %Define location of points for plotting
+%   x=linspace(-4,6,100);
+%   %Define values of time (days) to be used for plotting
+%   t=[0.5 1 2 4 8];
+%   
+%   %Evaluate the exact solution
+%   uA=AnalSol(x,t,nu,u0,x0);
+%   
+%   %Plot results
+%   figure(1)
+%   hold off
+%   plot(x,uA,'.')
+%   xlabel('Distance (m)')
+%   ylabel('Velocity (m/day)')
+%   for n=1:numel(t)
+%       MYlegend{n}=[num2str(t(n)) ' days'];
+%   end
+%   legend(MYlegend,'location','northwest')
+%   
+%   %**********************************************************************
+%   
+%   function u=AnalSol(x,t,nu,u0,x0)
+%   %Subfunction containing the analytical solution
+%   [x,t]=ndgrid(x,t);
+%   x1=(x+x0-u0*t)./sqrt(4*nu*t);
+%   x2=(x-x0-u0*t)./sqrt(4*nu*t);
+%   x3=(x0+x)./sqrt(4*nu*t);
+%   x4=(x0-x)./sqrt(4*nu*t);
+%   c=u0/2/nu;
+%   T3=exp(c*(x+x0-u0*t/2));
+%   T4=exp(c*(x-x0-u0*t/2));
+%   u=u0./(1+(T3.*erfc(x3)+T4.*erfc(x4))./(erfc(x2)-erfc(x1)));
+%
+% The proceeding outline of this session is as follows. First 
+% a simple explicit time-stepping scheme for the Burgers' equation is
+% devloped and  its stability requirement is assessed. Following on from this, a more
+% stable implicit scheme is developed. However, because of the
+% non-linearity in the Burgers' equation, the implicit scheme cannot be
+% implemented directly. Therefore, the Newton iteration method is
+% introduced as a methodology for iteratively solving the implicit scheme.
+% Subsequently it is shown that the first iteration of the fully implicit
+% scheme gives rise to an alternative unconditionally stable scheme,
+% referred to as a semi-implicit scheme. Finally, there is a classroom
+% assignment, which involves modifying code from "ADEStudy.m" (developed
+% during the previous session) to evaluate the various possible finite
+% difference schemes that can be used to solve the Burgers' equation.
+%
+%% ETCS - Explicit time-stepping with central differences in space
+%
+% First we will develop an Euler explicit time-stepping scheme for the BE 
+% problem described above and use a
+% central difference approximation for the $\partial u/\partial x$ term.
+% Ignoring all the truncation errors associated with the Taylor expansions
+% (discussed in the previous session),
+% the BE can then be written as
+%
+% $$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +u_{i,n}\left(\frac{u_{i+1,n}-u_{i-1,n}}
+% {2 \Delta x}\right)
+% -\nu\left(\frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta x^2}\right)=0 $$ 
+%
+% which can be rearranged to get
+%
+% $$ u_{i,n+1}=A_{i,n} u_{i-1,n}+B_{i,n} u_{i,n} + C_{i,n} u_{i+1,n} $$
+% 
+% where
+% 
+% $$ \displaystyle A_{i,n}=\frac{u_{i,n}\Delta t}{2 \Delta x}+\frac{\nu\Delta t}{\Delta x^2},
+% \quad
+% B_{i,n}=1-\frac{2\nu\Delta t}{\Delta x^2},
+% \quad
+% C_{i,n}=-\frac{u_{i,n}\Delta t}{2 \Delta x}+\frac{\nu\Delta t}{\Delta x^2} $$
+%
+% or alternatively it can be said that
+%
+% $$ u_{i,n+1}=P_{i,n} u_{i-1,n}+Q_{i,n} u_{i,n} + R_{i,n} u_{i+1,n} $$
+% 
+% where
+%
+% $$ \displaystyle P_{i,n}=\frac{\nu\Delta t}{\Delta x^2},
+% \quad
+% Q_{i,n}=1-\frac{2\nu\Delta t}{\Delta x^2}-\Delta t \left(\frac{u_{i+1,n}-u_{i-1,n}}{2 \Delta x}\right),
+% \quad
+% R_{i,n}=\frac{\nu\Delta t}{\Delta x^2} $$
+% 
+% Hereafter, both of the above schemes will be referred to as the ETCS scheme.
+%
+% Recall that for numerical stability of explicit time-stepping schemes to be ensured, it is
+% generally found that the coefficients, $A_{i,n}$, $B_{i,n}$ and $C_{i,n}$ (or $P_{i,n}$, $Q_{i,n}$ and $R_{i,n}$), need
+% always to be positive. For the case when $u$, $\partial u/\partial x$, $\nu$, $\Delta x$ and $\Delta
+% t$ are positive, it follows that there are two
+% stability criteria for these schemes:
+% 
+% $$ \displaystyle \mathrm{Cr_{eff}}\equiv \frac{\nu\Delta t}{\Delta x^2} +\frac{\Delta t}{2} \left(\frac{u_{i+1,n}-u_{i-1,n}}{2 \Delta x}\right)<0.5 
+% \quad
+% \mathrm{and}
+% \quad
+% \mathrm{Pe_{eff}}\equiv  \frac{u_{i,n}\Delta x}{\nu }<2 $$
+% 
+% where $\mathrm{Cr_{eff}}$ and $\mathrm{Pe_{eff}}$ can be thought of as being
+% an effective Courant number and effective Peclet number, respectively.
+%
+% The issue here, which is common to most non-linear PDEs, is
+% that it is not straightforward to specify a priori a $\Delta x$ and $\Delta t$
+% that will ensure stability of the system for the desired simulation
+% duration.
+%
+% Considering our experience from the previous session, it is postulated
+% that an impliciting time-stepping scheme with a backward difference for
+% the $\partial u/\partial x$ is likely to lead to an unconditionally
+% stable scheme.
+%
+%% ITBS - Implicit time-stepping with backward differences
+%
+% If we consider an Euler implicit time-stepping scheme and use a
+% backward difference approximation for the $\partial u/\partial x$ term,
+% ignoring all the truncation errors associated with the Taylor expansions,
+% the BE can be written as
+%
+% $$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t}
+% +u_{i,n+1}\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta
+% x}\right)-\nu\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta
+% x^2}\right)=0 $$
+%
+% which can be rearranged to get
+%
+% $$ u_{i,n}=A_{i,n+1} u_{i-1,n+1}+B_{i,n+1} u_{i,n+1} + C_{i,n+1} u_{i+1,n+1} $$ _____(3a)
+% 
+% where
+% 
+% $$ \displaystyle A_{i,n+1}=-\frac{u_{i,n+1}\Delta t}{ \Delta x}-\frac{\nu\Delta t}{\Delta x^2},
+% \quad
+% B_{i,n+1}=1+\frac{u_{i,n+1}\Delta t}{ \Delta x}+\frac{2\nu\Delta t}{\Delta x^2},
+% \quad
+% C_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2} $$
+%
+% or alternatively it can be said that
+%
+% $$ u_{i,n}=P_{i,n+1} u_{i-1,n+1}+Q_{i,n+1} u_{i,n+1} + R_{i,n+1} u_{i+1,n+1} $$
+%
+% where
+% 
+% $$ \displaystyle P_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2},
+% \quad
+% Q_{i,n+1}=1+\Delta t\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta x}\right)+\frac{2\nu\Delta t}{\Delta x^2},
+% \quad
+% R_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2} $$
+%
+% Hereafter this scheme will be referred to as the ITBS scheme.
+%
+% Recalling from the previous session, for implicit time-stepping
+% schemes, the coefficients $A_{i,n+1}$ and $C_{i,n+1}$ (or $P_{i,n+1}$ and $R_{i,n+1}$) 
+% need to be negative and the coefficents $B_{i,n+1}$ (or $Q_{i,n+1}$)
+% need to be positive to ensure stability. Consequently, for the case when $u$, 
+% $\partial u/\partial x$, $\nu$, $\Delta x$ and $\Delta t$ are positive,
+% the ITBS scheme should be unconditionally stable. However, for the
+% situation dicated by the boundary conditions given in Eq. (1b), even for
+% positive $u_0$, there will be a region where $\partial u/\partial x<0$.
+%
+% Despite the fact that ITBS does not appear to be unconditionally stable,
+% it can be appreciated that this scheme is likely to be much more stable
+% than the ETCS scheme.
+%
+% However, recall that the $\mathbf{A}$, $\mathbf{B}$ and $\mathbf{C}$ vectors of coefficients
+% represent the first, second and third diagonals of a tridiagonal Jacobian
+% matrix, $\mathbf{J}_{n+1}$, defined by the formula
+%
+% $$ \mathbf{u}_n=\mathbf{J}_{n+1} \mathbf{u}_{n+1} $$ _____(3b)
+%
+% Another challenge here is that evaluation of $\mathbf{J}_{n+1}$
+% also requires values from the $\mathbf{u}_{n+1}$ vector. Consequently
+% Eq. (3b) must be solved iteratively.
+%
+%% The Newton iteration method
+%
+% The Newton iteration method (also referred to as the Newton-Raphson
+% method), is a simple root finding algorithm often used to solve
+% non-linear PDEs using implicit time-stepping schemes such as Eq. (3b) above.
+%
+% The Newton iteration method for root finding can be simply derived as
+% follows:
+%
+% Consider a function, $f(x)$. It is desired to find a value, $x_{\mathrm{root}}$, such that
+% $f(x_{\mathrm{root}})=0$ (i.e., a root of $f(x)$) that is situated close to a value $x_0$.
+%
+% The equation for a line, $y$, that lies tangent to $f(x)$ at $x=x_0$ can
+% be written as
+%
+% $$ y = f'(x_0) (x-x_0) +f(x_0) $$ _____(4a)
+%
+% A good estimate for a value of $x_{root}$, which we will call $x_1$, can be found by extrapolating
+% the tangent equation, Eq. (4a), to $y=0$, i.e.:
+%
+% $$ 0 = f'(x_0) (x_1-x_0) +f(x_0) $$
+%
+% which can be rearranged to get
+%
+% $$ x_1 = x_0 - f(x_0) / f'(x_0) $$
+%
+% from which it can be envisaged that a progressively closer estimate of $x_{root}$
+% can be obtained from the recursive relationship
+%
+% $$ x_{m+1} = x_m - f(x_m) / f'(x_m) $$ _____(4b)
+%
+% where $m$ denotes the number of iterations that have been undertaken.
+%
+% The above system can also be used to solve systems of non-linear equations
+% such as Eq. (3b). In this case it is desired to find the roots of
+% the vector, $\mathbf{F}_{n+1,m}$, where $m$ denotes results from the m-th 
+% iteration, which satisfies
+%
+% $$  \mathbf{F}_{n+1,m} = \mathbf{u}_n-\mathbf{J}_{n+1,m} \mathbf{u}_{n+1,m} $$
+%
+% from which it can be seen that 
+%
+% $$\displaystyle \frac{\partial \mathbf{F}_{n+1,m}}{\partial \mathbf{u}_{n+1,m}} =-\mathbf{J}_{n+1,m}$$
+%
+% Further consideration of Eq. (4b) then suggests that a progressively closer estimate of $\mathbf{u}_{n+1}$
+% can be obtained from 
+%
+% $$ \mathbf{u}_{n+1,m+1} = \mathbf{u}_{n+1,m} +\mathbf{J}_{n+1,m}^{-1} [\mathbf{u}_n-\mathbf{J}_{n+1,m} \mathbf{u}_{n+1,m}] $$
+%
+% which reduces to
+%
+% $$ \mathbf{u}_{n+1,m+1} = \mathbf{J}_{n+1,m}^{-1} \mathbf{u}_n $$ _____(4c)
+%
+% where $\mathbf{J}_{n+1,m}$ is the Jacobian matrix (as defined in Eq.
+% (3b)) as determined assuming $\mathbf{u}_{n+1}=\mathbf{u}_{n+1,m}$.
+%
+% A good starting point is to try $\mathbf{u}_{n+1,0}=\mathbf{u}_{n}$.
+%
+% The iterative process should proceed until the scheme has achieved an
+% acceptable level of local convergence. A suitable criterion for the
+% accepting of $\mathbf{u}_{n+1,m}$ as a good enough approximation of $\mathbf{u}_{n+1}$
+% can be written as follows:
+%
+% $$\displaystyle \left|1 - \frac{u_{i,n+1,m}}{u_{i,n+1,m+1}}\right| < 10^{-6}, \quad i=1\ldots N_x$$
+%
+% where $N_x$ denotes the number of points that $x$ has been discretised
+% into.
+%
+%% SITBS - Semi-implicit time-stepping with backward differences
+%
+% Note that if only one iteration of the above scheme is considered we have
+%
+% $$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t}
+% +u_{i,n}\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta
+% x}\right)-\nu\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta
+% x^2}\right)=0 $$
+%
+% which can be rearranged to get
+%
+% $$ u_{i,n}=A_{i,n+1} u_{i-1,n+1}+B_{i,n+1} u_{i,n+1} + C_{i,n+1} u_{i+1,n+1} $$ _____(5a)
+% 
+% where
+% 
+% $$ \displaystyle A_{i,n+1}=-\frac{u_{i,n}\Delta t}{ \Delta x}-\frac{\nu\Delta t}{\Delta x^2},
+% \quad
+% B_{i,n+1}=1+\frac{u_{i,n}\Delta t}{ \Delta x}+\frac{2\nu\Delta t}{\Delta x^2},
+% \quad
+% C_{i,n+1}=-\frac{\nu\Delta t}{\Delta x^2} $$
+%
+% which, providing $u_{i,n}>0$, can be seen to be unconditionally stable.
+%
+% This scheme should be hereafter referred to as SITBS.
+%
+% Such a scheme is often referred to as a semi-implicit scheme or a mixed
+% implicit and explicit scheme because it is implicit in the sense that
+% Eq. (5a) cannot be solved explicitly for $u_{i,n+1}$, but explicit in
+% terms of the fact that the $u_i$ terms in the $A_{i,n}$ and
+% $B_{i,n}$ coefficients are taken from the previous time-step. Such
+% schemes are often implemented as a simple alternative to  fully implicit
+% schemes in practice.
+%
+%% Classroom Assignment
+%
+% 1) Modify the code developed in ADEStudy.m (developed during the previous
+% session) to add an appropriate subfunction to BurgersStudy.m to 
+% solve the problem described by Eqs. (1a) and (1b) using
+% the SITBS scheme and compare your results to the analytical solution
+% given in Eq. (1c). Try using $\Delta x=0.02$ m and $\Delta t=0.25$ days.
+% Take special care when incorporating the $\mathbf{A}$, $\mathbf{B}$ and
+% $\mathbf{C}$ vectors into your Jacobian matrix using |spdiags|. Check the 
+% help documentation for |spdiags| to be sure.
+%
+% 2) Modify your SITBS scheme further to obtain the ITBS scheme using the
+% Newton iteration method described above. Specify a maximum number of
+% iterations of 100. How many iterations are required for convergence? 
+% How much more accurate is ITBS as compared SITBS?
+%
+% 3) Solve the same problem using |ODE15s| with backward differencing. Note that specifying the
+% Jacobian pattern (as we did in previous sessions) should lead to
+% a considerable CPU time saving. How does this solution compare to ITBS?
+% What happens if you set $\nu=0.01$ $\mathrm{m}^2\mathrm{day}^{-1}$ ? Try
+% using |tic| and |toc| (see help documentation) to determine which of your 
+% approximate solutions is most
+% efficient? What happens if you use a central differencing scheme instead?
+
+    
+
+
+##### SOURCE END #####
+--></body></html>

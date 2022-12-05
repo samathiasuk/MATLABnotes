@@ -1,0 +1,967 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>NNESMO: Session 8 - Stability and numerical diffusion</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-03-15"><meta name="DC.source" content="Session8.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>NNESMO: Session 8 - Stability and numerical diffusion</h1><!--introduction--><p>Prof Simon Mathias</p><p>Department of Engineering</p><p>Durham University</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">This session's learning objectives</a></li><li><a href="#2">The advection diffusion equation (ADE)</a></li><li><a href="#3">Taylor expansions and finite difference</a></li><li><a href="#4">ETCS - Explicit time-stepping with central differences in space</a></li><li><a href="#5">ITCS - Implicit time-stepping with central differences in space</a></li><li><a href="#6">ITBS - Implicit time-stepping with backward differences</a></li><li><a href="#7">ETBS - Explicit time-stepping with backward differences</a></li><li><a href="#8">Classroom Assignment - Part 1</a></li><li><a href="#9">Numerical diffusion</a></li><li><a href="#10">Classroom Assignment - Part 2</a></li></ul></div><h2>This session's learning objectives<a name="1"></a></h2><p>At the end of this session you should be able to:</p><div><ul><li>Derive multiple finite difference solutions for the advection diffusion equation.</li><li>Speculate about stability criteria by assessing the sign of finite difference coefficients.</li><li>Calculate numerical diffusion due to different finite difference schemes using Taylor expansions.</li></ul></div><h2>The advection diffusion equation (ADE)<a name="2"></a></h2><p>Most of the problems considered up till now can be thought of as representing special forms of the so-called advection diffusion equation (ADE)</p><p><span class="MathJax_Preview"><img src="Session8_eq17516.png" alt="$$ \displaystyle \frac{\partial u}{\partial t}+a\frac{\partial u}{\partial x}-b\frac{\partial^2 u}{\partial x^2}=0 $$"></span><script type="math/tex"> \displaystyle \frac{\partial u}{\partial t}+a\frac{\partial u}{\partial x}-b\frac{\partial^2 u}{\partial x^2}=0 </script> ___(1)</p><p>where <span class="MathJax_Preview"><img src="Session8_eq35435.png" alt="$u$"></span><script type="math/tex">u</script> is the dependent variable, <span class="MathJax_Preview"><img src="Session8_eq43551.png" alt="$x$"></span><script type="math/tex">x</script> is distance, <span class="MathJax_Preview"><img src="Session8_eq07064.png" alt="$t$"></span><script type="math/tex">t</script> is time and <span class="MathJax_Preview"><img src="Session8_eq34276.png" alt="$a$"></span><script type="math/tex">a</script> and <span class="MathJax_Preview"><img src="Session8_eq28812.png" alt="$b$"></span><script type="math/tex">b</script> are constant parameters.</p><p>We specifcally solved the ADE when considering the previous pollution transport scenario. Recall it was found that the ADE exhibited some numerical instabilities when high values of <span class="MathJax_Preview"><img src="Session8_eq34276.png" alt="$a$"></span><script type="math/tex">a</script> were applied. The reason that the ADE is challenging to solve in this context is due to its composite hyperbolic and parabolic nature.</p><p>When <span class="MathJax_Preview"><img src="Session8_eq05262.png" alt="$a=0$"></span><script type="math/tex">a=0</script>, the ADE reduces to a parabolic partial differential equation (PDE) identical to the groundwater flow equation, chemical diffusion equation and heat conduction equation considered previously. A parabolic equation is characterized by having all time derivatives of first-order and all spatial derivatives of second-order. Such equations are relatively straightforward to solve using finite difference methods.</p><p>When <span class="MathJax_Preview"><img src="Session8_eq69818.png" alt="$b=0$"></span><script type="math/tex">b=0</script>, the ADE reduces to a hyperbolic PDE, similar to the wave equation. Hyperbolic equations are characterised by having both time and space derivatives of the same order. Hyperbolic equations can be solved analytically using the so-called "Method of Characteristics" (MOC).</p><p>When both <span class="MathJax_Preview"><img src="Session8_eq34276.png" alt="$a$"></span><script type="math/tex">a</script> and <span class="MathJax_Preview"><img src="Session8_eq28812.png" alt="$b$"></span><script type="math/tex">b</script> are non-zero, the ADE cannot be solved using MOC and it is also challenging to solve using finite differences. Situations when both <span class="MathJax_Preview"><img src="Session8_eq34276.png" alt="$a$"></span><script type="math/tex">a</script> and <span class="MathJax_Preview"><img src="Session8_eq28812.png" alt="$b$"></span><script type="math/tex">b</script> are non-zero frequently come up in Earth Science. This is a particular problem when seeking to solve diffusion type equations, which have spatially varying diffusion coefficients.  For example, consider the situation:</p><p><span class="MathJax_Preview"><img src="Session8_eq64011.png" alt="$$ \displaystyle \frac{\partial c}{\partial t}=\frac{\partial}{\partial x}&#xA;\left(E \frac{\partial c}{\partial x}\right)=\frac{\partial E}{\partial&#xA;x}\frac{\partial c}{\partial x}+E\frac{\partial^2 c}{\partial x^2} $$"></span><script type="math/tex"> \displaystyle \frac{\partial c}{\partial t}=\frac{\partial}{\partial x}
+\left(E \frac{\partial c}{\partial x}\right)=\frac{\partial E}{\partial
+x}\frac{\partial c}{\partial x}+E\frac{\partial^2 c}{\partial x^2} </script></p><p>In this session we will examine why such difficulties occur and explore how some of the consequences can be dealt with.</p><p>For the next few examples, the following initial and boundary conditions are considered:</p><p><span class="MathJax_Preview"><img src="Session8_eq91279.png" alt="$$ \begin{array}{lll}&#xA;u=u_I, &amp; 0< x \leq L, &amp; t=0\\&#xA;u=u_0, &amp; x=0, &amp; t&gt;0\\&#xA;u=u_I, &amp; x=L, &amp; t&gt;0\\&#xA;\end{array} $$"></span><script type="math/tex"> \begin{array}{lll}
+u=u_I, & 0< x \leq L, & t=0\\
+u=u_0, & x=0, & t>0\\
+u=u_I, & x=L, & t>0\\
+\end{array} </script></p><p>where <span class="MathJax_Preview"><img src="Session8_eq67120.png" alt="$u_I$"></span><script type="math/tex">u_I</script> and <span class="MathJax_Preview"><img src="Session8_eq79048.png" alt="$u_0$"></span><script type="math/tex">u_0</script> represent  specified values of <span class="MathJax_Preview"><img src="Session8_eq35435.png" alt="$u$"></span><script type="math/tex">u</script> and <span class="MathJax_Preview"><img src="Session8_eq93576.png" alt="$L$"></span><script type="math/tex">L</script> is the length of the domain.</p><p>For the special case where <span class="MathJax_Preview"><img src="Session8_eq18395.png" alt="$L\rightarrow\infty$"></span><script type="math/tex">L\rightarrow\infty</script>, the above system of equations can be solved exactly to obtain</p><p><span class="MathJax_Preview"><img src="Session8_eq74019.png" alt="$$ \displaystyle \frac{u-u_I}{u_0-u_I}=\frac{1}{2}\left[&#xA;\mathrm{erfc}\left(\frac{x-at}{2\sqrt{bt}}\right)&#xA;+\exp\left(\frac{ax}{b}\right)&#xA;\mathrm{erfc}\left(\frac{x+at}{2\sqrt{bt}}\right)&#xA;\right]&#xA;$$"></span><script type="math/tex"> \displaystyle \frac{u-u_I}{u_0-u_I}=\frac{1}{2}\left[
+\mathrm{erfc}\left(\frac{x-at}{2\sqrt{bt}}\right)
++\exp\left(\frac{ax}{b}\right)
+\mathrm{erfc}\left(\frac{x+at}{2\sqrt{bt}}\right)
+\right]
+</script></p><p>To evaluate the analytical solution, type in the following code in a single script-file and save it in an appropriate place as "ADEStudy.m".</p><pre class="language-matlab"><span class="keyword">function</span> ADEStudy
+<span class="comment">%A sequence of different subfunctions to explore stability and</span>
+<span class="comment">%numerical diffusion associated with finite difference solutions of</span>
+<span class="comment">%the advection diffusion equation.</span>
+</pre><pre class="language-matlab"><span class="comment">%Define model parameters</span>
+L=2; <span class="comment">%m</span>
+a=1; <span class="comment">%m/day</span>
+b=0.01; <span class="comment">%m^2/day</span>
+uI=0; <span class="comment">%mg/l</span>
+u0=1; <span class="comment">%mg/l</span>
+</pre><pre class="language-matlab"><span class="comment">%Define location of points for plotting</span>
+x=linspace(0,L,50);
+<span class="comment">%Define values of time to be used for plotting</span>
+t=[1];
+</pre><pre class="language-matlab"><span class="comment">%Evaluate the exact solution</span>
+uA=AnalSol(x,t,a,b,uI,u0);
+</pre><pre class="language-matlab"><span class="comment">%Plot results</span>
+figure(1)
+hold <span class="string">off</span>
+plot(x,uA,<span class="string">'ko'</span>)
+xlabel(<span class="string">'Distance (m)'</span>)
+ylabel(<span class="string">'Concentration (mg/l)'</span>)
+title(<span class="string">'Concentration profile after one day'</span>)
+</pre><pre class="language-matlab"><span class="comment">%**********************************************************************</span>
+</pre><pre class="language-matlab"><span class="keyword">function</span> u=AnalSol(x,t,a,b,uI,u0)
+<span class="comment">%Subfunction containing the analytical solution</span>
+[x,t]=ndgrid(x,t);
+Pe=a*x/b;
+F1=erfc((x-a*t)./2./sqrt(b*t))/2;
+F2=exp(Pe).*erfc((x+a*t)./2./sqrt(b*t))/2;
+F=F1+F2;
+ind=Pe&gt;700;
+F(ind)=F1(ind);
+u=(u0-uI)*F+uI;
+</pre><p>The outline of the remainder of this session is as follows. First we will derive a set of finite difference approximations using Taylor expansions. Following on from this we will develop four different finite difference solutions to the ADE along with associated stability criteria. We will then use the Taylor expansions to derive expressions for the numerical diffusion associated with each of the finite difference schemes. Finally, we will develop a higher order time integration scheme using <tt>ode45</tt> and compare this with the earlier first-order explicit and implicit time-stepping schemes.</p><h2>Taylor expansions and finite difference<a name="3"></a></h2><p>Consider a set of discrete points in time and space, <span class="MathJax_Preview"><img src="Session8_eq44404.png" alt="$(x_i,t_n)$"></span><script type="math/tex">(x_i,t_n)</script>, where <span class="MathJax_Preview"><img src="Session8_eq01017.png" alt="$x_i$"></span><script type="math/tex">x_i</script> and <span class="MathJax_Preview"><img src="Session8_eq38123.png" alt="$t_n$"></span><script type="math/tex">t_n</script> represent the i-th point in space and n-th point in time, respectively. It is assumed that these discrete points are separated by uniform intervals in both space and time of <span class="MathJax_Preview"><img src="Session8_eq25872.png" alt="$\Delta x$"></span><script type="math/tex">\Delta x</script> and <span class="MathJax_Preview"><img src="Session8_eq48211.png" alt="$\Delta t$"></span><script type="math/tex">\Delta t</script>, respectively. The values of a function, <span class="MathJax_Preview"><img src="Session8_eq97345.png" alt="$u(x,t)$"></span><script type="math/tex">u(x,t)</script>, at the locations of these discrete points can be written as <span class="MathJax_Preview"><img src="Session8_eq35162.png" alt="$u_{i,n}= u(x_i,t_n)$"></span><script type="math/tex">u_{i,n}= u(x_i,t_n)</script>.</p><p>It is possible to derive finite difference approximations for the derivatives of <span class="MathJax_Preview"><img src="Session8_eq35435.png" alt="$u$"></span><script type="math/tex">u</script> with respect to <span class="MathJax_Preview"><img src="Session8_eq43551.png" alt="$x$"></span><script type="math/tex">x</script> and <span class="MathJax_Preview"><img src="Session8_eq07064.png" alt="$t$"></span><script type="math/tex">t</script> by considering the Taylor expansion:</p><p><span class="MathJax_Preview"><img src="Session8_eq72596.png" alt="$$ \displaystyle u(t+\Delta t) = u(t) + \Delta t \frac{\partial u}{\partial t}+\frac{\Delta&#xA;t^2}{2!}\frac{\partial ^2 u}{\partial t^2}+\frac{\Delta t^3}{3!}\frac{\partial ^3&#xA;u}{\partial t^3}+O(\Delta t^4) $$"></span><script type="math/tex"> \displaystyle u(t+\Delta t) = u(t) + \Delta t \frac{\partial u}{\partial t}+\frac{\Delta
+t^2}{2!}\frac{\partial ^2 u}{\partial t^2}+\frac{\Delta t^3}{3!}\frac{\partial ^3
+u}{\partial t^3}+O(\Delta t^4) </script></p><p>from which it can be seen that:</p><p><span class="MathJax_Preview"><img src="Session8_eq63150.png" alt="$$ \displaystyle u_{i,n+1} = u_{i,n} + \Delta t \left.\frac{\partial u}{\partial t}\right|_{i,n}&#xA;+\frac{\Delta t^2}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n}&#xA;+\frac{\Delta t^3}{3!}\left.\frac{\partial ^3&#xA;u}{\partial t^3}\right|_{i,n}+O(\Delta t^4) $$"></span><script type="math/tex"> \displaystyle u_{i,n+1} = u_{i,n} + \Delta t \left.\frac{\partial u}{\partial t}\right|_{i,n}
++\frac{\Delta t^2}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n}
++\frac{\Delta t^3}{3!}\left.\frac{\partial ^3
+u}{\partial t^3}\right|_{i,n}+O(\Delta t^4) </script></p><p><span class="MathJax_Preview"><img src="Session8_eq15924.png" alt="$$ \displaystyle u_{i+1,n} = u_{i,n} + \Delta x \left.\frac{\partial u}{\partial x}\right|_{i,n}&#xA;+\frac{\Delta x^2}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}&#xA;+\frac{\Delta x^3}{3!}\left.\frac{\partial ^3 u}{\partial x^3}\right|_{i,n}&#xA;+O(\Delta x^4) $$"></span><script type="math/tex"> \displaystyle u_{i+1,n} = u_{i,n} + \Delta x \left.\frac{\partial u}{\partial x}\right|_{i,n}
++\frac{\Delta x^2}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}
++\frac{\Delta x^3}{3!}\left.\frac{\partial ^3 u}{\partial x^3}\right|_{i,n}
++O(\Delta x^4) </script></p><p>It is also possible to state that</p><p><span class="MathJax_Preview"><img src="Session8_eq96347.png" alt="$$ \displaystyle u(t-\Delta t) = u(t) - \Delta t \frac{\partial u}{\partial t}+\frac{\Delta&#xA;t^2}{2!}\frac{\partial ^2 u}{\partial t^2}-\frac{\Delta t^3}{3!}\frac{\partial ^3&#xA;u}{\partial t^3}+O(\Delta t^4) $$"></span><script type="math/tex"> \displaystyle u(t-\Delta t) = u(t) - \Delta t \frac{\partial u}{\partial t}+\frac{\Delta
+t^2}{2!}\frac{\partial ^2 u}{\partial t^2}-\frac{\Delta t^3}{3!}\frac{\partial ^3
+u}{\partial t^3}+O(\Delta t^4) </script></p><p>from which it can be seen that:</p><p><span class="MathJax_Preview"><img src="Session8_eq54925.png" alt="$$ \displaystyle u_{i,n} = u_{i,n+1} - \Delta t \left.\frac{\partial u}{\partial t}\right|_{i,n+1}+\frac{\Delta&#xA;t^2}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n+1}-\frac{\Delta t^3}{3!}\left.\frac{\partial ^3&#xA;u}{\partial t^3}\right|_{i,n+1}+O(\Delta t^4) $$"></span><script type="math/tex"> \displaystyle u_{i,n} = u_{i,n+1} - \Delta t \left.\frac{\partial u}{\partial t}\right|_{i,n+1}+\frac{\Delta
+t^2}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n+1}-\frac{\Delta t^3}{3!}\left.\frac{\partial ^3
+u}{\partial t^3}\right|_{i,n+1}+O(\Delta t^4) </script></p><p><span class="MathJax_Preview"><img src="Session8_eq65913.png" alt="$$ \displaystyle u_{i-1,n} = u_{i,n} - \Delta x \left.\frac{\partial u}{\partial x}\right|_{i,n}+\frac{\Delta&#xA;x^2}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}-\frac{\Delta x^3}{3!}\left.\frac{\partial ^3&#xA;u}{\partial x^3}\right|_{i,n}+O(\Delta x^4) $$"></span><script type="math/tex"> \displaystyle u_{i-1,n} = u_{i,n} - \Delta x \left.\frac{\partial u}{\partial x}\right|_{i,n}+\frac{\Delta
+x^2}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}-\frac{\Delta x^3}{3!}\left.\frac{\partial ^3
+u}{\partial x^3}\right|_{i,n}+O(\Delta x^4) </script></p><p>Interestingly, it can also be seen that:</p><p><span class="MathJax_Preview"><img src="Session8_eq18894.png" alt="$$ \displaystyle u_{i+1,n}-u_{i-1,n} =2 \Delta x \left.\frac{\partial u}{\partial x}\right|_{i,n}+2\frac{\Delta x^3}{3!}\left.\frac{\partial ^3&#xA;u}{\partial x^3}\right|_{i,n}+O(\Delta x^4) $$"></span><script type="math/tex"> \displaystyle u_{i+1,n}-u_{i-1,n} =2 \Delta x \left.\frac{\partial u}{\partial x}\right|_{i,n}+2\frac{\Delta x^3}{3!}\left.\frac{\partial ^3
+u}{\partial x^3}\right|_{i,n}+O(\Delta x^4) </script></p><p><span class="MathJax_Preview"><img src="Session8_eq37066.png" alt="$$ \displaystyle u_{i+1,n}+u_{i-1,n} = 2u_{i,n}+2\frac{\Delta&#xA;x^2}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}+O(\Delta x^4)&#xA;$$"></span><script type="math/tex"> \displaystyle u_{i+1,n}+u_{i-1,n} = 2u_{i,n}+2\frac{\Delta
+x^2}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}+O(\Delta x^4)
+</script></p><p>Rearranging the above set of equations leads to the following set of finite difference approximations:</p><p><span class="MathJax_Preview"><img src="Session8_eq98166.png" alt="$$ \displaystyle \frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta x^2} =\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}+O(\Delta x^2) $$"></span><script type="math/tex"> \displaystyle \frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta x^2} =\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}+O(\Delta x^2) </script> ___(2a)</p><p><span class="MathJax_Preview"><img src="Session8_eq65836.png" alt="$$ \displaystyle \frac{u_{i+1,n}-u_{i-1,n}}{2 \Delta x}= \left.\frac{\partial u}{\partial x}\right|_{i,n} +O(\Delta x^2) $$"></span><script type="math/tex"> \displaystyle \frac{u_{i+1,n}-u_{i-1,n}}{2 \Delta x}= \left.\frac{\partial u}{\partial x}\right|_{i,n} +O(\Delta x^2) </script> ___(2b)</p><p><span class="MathJax_Preview"><img src="Session8_eq61667.png" alt="$$ \displaystyle \frac{u_{i,n}-u_{i-1,n}}{\Delta x} = \left.\frac{\partial u}{\partial x}\right|_{i,n} -\frac{\Delta x}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n} +O(\Delta x^2) $$"></span><script type="math/tex"> \displaystyle \frac{u_{i,n}-u_{i-1,n}}{\Delta x} = \left.\frac{\partial u}{\partial x}\right|_{i,n} -\frac{\Delta x}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n} +O(\Delta x^2) </script> ___(2c)</p><p><span class="MathJax_Preview"><img src="Session8_eq58464.png" alt="$$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} =  \left.\frac{\partial u}{\partial t}\right|_{i,n+1} -\frac{\Delta t}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n+1} +O(\Delta t^2) $$"></span><script type="math/tex"> \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} =  \left.\frac{\partial u}{\partial t}\right|_{i,n+1} -\frac{\Delta t}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n+1} +O(\Delta t^2) </script> ___(2d)</p><p><span class="MathJax_Preview"><img src="Session8_eq70688.png" alt="$$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} =  \left.\frac{\partial u}{\partial t}\right|_{i,n} +\frac{\Delta t}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n} +O(\Delta t^2) $$"></span><script type="math/tex"> \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} =  \left.\frac{\partial u}{\partial t}\right|_{i,n} +\frac{\Delta t}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n} +O(\Delta t^2) </script> ___(2e)</p><h2>ETCS - Explicit time-stepping with central differences in space<a name="4"></a></h2><p>First we will develop an Euler explicit time-stepping scheme for the ADE problem described above and use a central difference approximation for the <span class="MathJax_Preview"><img src="Session8_eq80180.png" alt="$\partial u/\partial x$"></span><script type="math/tex">\partial u/\partial x</script> term. Ignoring all the truncation errors associated with the Taylor expansions, the ADE can then be written as</p><p><span class="MathJax_Preview"><img src="Session8_eq20114.png" alt="$$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +a\left(\frac{u_{i+1,n}-u_{i-1,n}} {2 \Delta x}\right) -b\left(\frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta x^2}\right)=0 $$"></span><script type="math/tex"> \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +a\left(\frac{u_{i+1,n}-u_{i-1,n}} {2 \Delta x}\right) -b\left(\frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta x^2}\right)=0 </script> ___(3a)</p><p>which can be rearranged to get</p><p><span class="MathJax_Preview"><img src="Session8_eq28660.png" alt="$$ u_{i,n+1}=A u_{i-1,n}+B u_{i,n} + C u_{i+1,n} $$"></span><script type="math/tex"> u_{i,n+1}=A u_{i-1,n}+B u_{i,n} + C u_{i+1,n} </script></p><p>where</p><p><span class="MathJax_Preview"><img src="Session8_eq04308.png" alt="$$ \displaystyle A=\frac{a\Delta t}{2 \Delta x}+\frac{b\Delta t}{\Delta x^2},&#xA;\quad&#xA;B=1-\frac{2b\Delta t}{\Delta x^2},&#xA;\quad&#xA;C=-\frac{a\Delta t}{2 \Delta x}+\frac{b\Delta t}{\Delta x^2} $$"></span><script type="math/tex"> \displaystyle A=\frac{a\Delta t}{2 \Delta x}+\frac{b\Delta t}{\Delta x^2},
+\quad
+B=1-\frac{2b\Delta t}{\Delta x^2},
+\quad
+C=-\frac{a\Delta t}{2 \Delta x}+\frac{b\Delta t}{\Delta x^2} </script></p><p>Hereafter this scheme will be referred to as the ETCS scheme.</p><p>For numerical stability of explicit time-stepping schemes to be ensured it is generally found that the coefficients, <span class="MathJax_Preview"><img src="Session8_eq31461.png" alt="$A$"></span><script type="math/tex">A</script>, <span class="MathJax_Preview"><img src="Session8_eq73617.png" alt="$B$"></span><script type="math/tex">B</script> and <span class="MathJax_Preview"><img src="Session8_eq22407.png" alt="$C$"></span><script type="math/tex">C</script>, need always to be positive. Given that <span class="MathJax_Preview"><img src="Session8_eq34276.png" alt="$a$"></span><script type="math/tex">a</script>, <span class="MathJax_Preview"><img src="Session8_eq28812.png" alt="$b$"></span><script type="math/tex">b</script>, <span class="MathJax_Preview"><img src="Session8_eq25872.png" alt="$\Delta x$"></span><script type="math/tex">\Delta x</script> and <span class="MathJax_Preview"><img src="Session8_eq48211.png" alt="$\Delta t$"></span><script type="math/tex">\Delta t</script> should also always be positive, it follows that there are two stability criteria for this scheme:</p><p><span class="MathJax_Preview"><img src="Session8_eq31083.png" alt="$$ \displaystyle \mathrm{Cr}\equiv \frac{b\Delta t}{\Delta x^2}<0.5&#xA;\quad&#xA;\mathrm{and}&#xA;\quad&#xA;\mathrm{Pe}\equiv  \frac{a\Delta x}{b }<2 $$"></span><script type="math/tex"> \displaystyle \mathrm{Cr}\equiv \frac{b\Delta t}{\Delta x^2}<0.5
+\quad
+\mathrm{and}
+\quad
+\mathrm{Pe}\equiv  \frac{a\Delta x}{b }<2 </script></p><p>where <span class="MathJax_Preview"><img src="Session8_eq20934.png" alt="$\mathrm{Cr}$"></span><script type="math/tex">\mathrm{Cr}</script> and <span class="MathJax_Preview"><img src="Session8_eq16432.png" alt="$\mathrm{Pe}$"></span><script type="math/tex">\mathrm{Pe}</script> are often referred to as the Courant number and Peclet number, respectively.</p><p>To evaluate the ETCS scheme add the following subfunction to ADEStudy.m:</p><pre class="language-matlab"><span class="comment">%**********************************************************************</span>
+</pre><pre class="language-matlab"><span class="keyword">function</span> u=FDSol(xI,tI,a,b,uI,u0,Pe,Cr)
+<span class="comment">%Subfunction containing the finite difference solutions</span>
+</pre><pre class="language-matlab"><span class="comment">%Determine the space-step and time-step using a specified</span>
+<span class="comment">%Courant and Peclet number</span>
+dx=Pe*b/a;
+dt=Cr*dx^2/b;
+</pre><pre class="language-matlab"><span class="comment">%Determine number of nodes to solve for</span>
+Nx=ceil((xI(end)-xI(1))/dx)+1;
+Nt=ceil(tI(end)/dt)+1;
+</pre><pre class="language-matlab"><span class="comment">%Determine the location of solution points in x and t</span>
+x=[0:dx:dx*(Nx-1)]+xI(1);
+t=[0:dt:dt*(Nt-1)];
+</pre><pre class="language-matlab"><span class="comment">%Initialise the solution matrix</span>
+u=zeros(Nx,Nt);
+</pre><pre class="language-matlab"><span class="comment">%Apply initial condition</span>
+u(:,1)=uI;
+</pre><pre class="language-matlab"><span class="comment">%Apply boundary conditions</span>
+u(1,:)=u0;
+u(Nx,:)=uI;
+</pre><pre class="language-matlab"><span class="comment">%Determine A, B and C coefficients</span>
+A=a*dt/2/dx+b*dt/dx^2;
+B=1-2*b*dt/dx^2;
+C=-a*dt/2/dx+b*dt/dx^2;
+</pre><pre class="language-matlab"><span class="comment">%Determine Jacobian matrix</span>
+J=spdiags(ones(Nx,1)*[A B C],[-1 0 1],Nx,Nx);
+</pre><pre class="language-matlab"><span class="comment">%Apply boundary conditions</span>
+J(1,:)=0;
+J(1,1)=1;
+J(Nx,:)=0;
+J(Nx,Nx)=1;
+</pre><pre class="language-matlab"><span class="comment">%Solve problem</span>
+<span class="keyword">for</span> n=1:Nt-1
+    u(:,n+1)=J*u(:,n);
+<span class="keyword">end</span>
+</pre><pre class="language-matlab"><span class="comment">%Interpolate solution to plotting points</span>
+u=interp2(t,x',u,tI,xI');
+</pre><p>Note that the values of <span class="MathJax_Preview"><img src="Session8_eq25872.png" alt="$\Delta x$"></span><script type="math/tex">\Delta x</script> and <span class="MathJax_Preview"><img src="Session8_eq48211.png" alt="$\Delta t$"></span><script type="math/tex">\Delta t</script> are determined by considering a specified Peclet and Courant number. Also note that the solution is then interpolated to the values of <span class="MathJax_Preview"><img src="Session8_eq43551.png" alt="$x$"></span><script type="math/tex">x</script> and <span class="MathJax_Preview"><img src="Session8_eq07064.png" alt="$t$"></span><script type="math/tex">t</script> specified by the input arguments of the sub-function. This removes the need to plot all the solution points solved for, which can be excessive depending on the Peclet number and Courant number specified.</p><p>It is also interesting to see that the <span class="MathJax_Preview"><img src="Session8_eq31461.png" alt="$A$"></span><script type="math/tex">A</script>, <span class="MathJax_Preview"><img src="Session8_eq73617.png" alt="$B$"></span><script type="math/tex">B</script> and <span class="MathJax_Preview"><img src="Session8_eq22407.png" alt="$C$"></span><script type="math/tex">C</script> coefficients represent the values of the first, second and third diagonal of the Jacobian matrix, <span class="MathJax_Preview"><img src="Session8_eq16246.png" alt="$\mathbf{J}$"></span><script type="math/tex">\mathbf{J}</script>, defined in this case by the formula</p><p><span class="MathJax_Preview"><img src="Session8_eq37517.png" alt="$$ \mathbf{u}_{n+1}=\mathbf{J}\mathbf{u}_{n} $$"></span><script type="math/tex"> \mathbf{u}_{n+1}=\mathbf{J}\mathbf{u}_{n} </script></p><p>To evaluate the ETCS scheme, replace:</p><pre class="language-matlab"><span class="comment">%Plot results</span>
+figure(1)
+hold <span class="string">off</span>
+plot(x,uA,<span class="string">'k'</span>)
+xlabel(<span class="string">'Distance (m)'</span>)
+ylabel(<span class="string">'Concentration (mg/l)'</span>)
+title(<span class="string">'Concentration profile after one day'</span>)
+</pre><p>in the main function of ADEStudy.m with:</p><pre class="language-matlab"><span class="comment">%Specify a Peclet number and Courant number</span>
+Pe=2;
+Cr=0.5;
+</pre><pre class="language-matlab"><span class="comment">%Evaluate the finite difference solution</span>
+uFD=FDSol(x,t,a,b,uI,u0,Pe,Cr);
+</pre><pre class="language-matlab"><span class="comment">%Plot results</span>
+figure(1)
+hold <span class="string">off</span>
+plot(x,uA,<span class="string">'k'</span>)
+hold <span class="string">on</span>
+plot(x,uFD)
+xlabel(<span class="string">'Distance (m)'</span>)
+ylabel(<span class="string">'Concentration (mg/l)'</span>)
+title(<span class="string">'Concentration profile after one day'</span>)
+legend(<span class="string">'Analytical solution'</span>,<span class="string">'Finite difference solution'</span>)
+</pre><p>Run the script-file and compare the results from the analytical solution and the finite difference solution. Experiment by varying the specified value of <span class="MathJax_Preview"><img src="Session8_eq16432.png" alt="$\mathrm{Pe}$"></span><script type="math/tex">\mathrm{Pe}</script> and <span class="MathJax_Preview"><img src="Session8_eq20934.png" alt="$\mathrm{Cr}$"></span><script type="math/tex">\mathrm{Cr}</script>. Do the pre-determined stability criteria work? Does stability also ensure accuracy?</p><h2>ITCS - Implicit time-stepping with central differences in space<a name="5"></a></h2><p>Here we will develop an Euler implicit time-stepping scheme and use a central difference approximation for the <span class="MathJax_Preview"><img src="Session8_eq80180.png" alt="$\partial u/\partial x$"></span><script type="math/tex">\partial u/\partial x</script> term. Ignoring all the truncation errors associated with the Taylor expansions, the ADE can then be written as</p><p><span class="MathJax_Preview"><img src="Session8_eq64098.png" alt="$$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +a\left(\frac{u_{i+1,n+1}-u_{i-1,n+1}}{2 \Delta x}\right)-b\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta x^2}\right)=0 $$"></span><script type="math/tex"> \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +a\left(\frac{u_{i+1,n+1}-u_{i-1,n+1}}{2 \Delta x}\right)-b\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta x^2}\right)=0 </script> ___(3b)</p><p>which can be rearranged to get</p><p><span class="MathJax_Preview"><img src="Session8_eq81088.png" alt="$$ u_{i,n}=A u_{i-1,n+1}+B u_{i,n+1} + C u_{i+1,n+1} $$"></span><script type="math/tex"> u_{i,n}=A u_{i-1,n+1}+B u_{i,n+1} + C u_{i+1,n+1} </script></p><p>where</p><p><span class="MathJax_Preview"><img src="Session8_eq16779.png" alt="$$ \displaystyle A=-\frac{a\Delta t}{2 \Delta x}-\frac{b\Delta t}{\Delta x^2},&#xA;\quad&#xA;B=1+\frac{2b\Delta t}{\Delta x^2},&#xA;\quad&#xA;C=\frac{a\Delta t}{2 \Delta x}-\frac{b\Delta t}{\Delta x^2} $$"></span><script type="math/tex"> \displaystyle A=-\frac{a\Delta t}{2 \Delta x}-\frac{b\Delta t}{\Delta x^2},
+\quad
+B=1+\frac{2b\Delta t}{\Delta x^2},
+\quad
+C=\frac{a\Delta t}{2 \Delta x}-\frac{b\Delta t}{\Delta x^2} </script></p><p>Hereafter this scheme will be referred to as the ITCS scheme.</p><p>For numerical stability of implicit time-stepping schemes to be ensured it is generally found that the coefficients, <span class="MathJax_Preview"><img src="Session8_eq31461.png" alt="$A$"></span><script type="math/tex">A</script> and <span class="MathJax_Preview"><img src="Session8_eq22407.png" alt="$C$"></span><script type="math/tex">C</script> need always to be negative whereas <span class="MathJax_Preview"><img src="Session8_eq73617.png" alt="$B$"></span><script type="math/tex">B</script> needs to be positive. Given that <span class="MathJax_Preview"><img src="Session8_eq34276.png" alt="$a$"></span><script type="math/tex">a</script>, <span class="MathJax_Preview"><img src="Session8_eq28812.png" alt="$b$"></span><script type="math/tex">b</script>, <span class="MathJax_Preview"><img src="Session8_eq25872.png" alt="$\Delta x$"></span><script type="math/tex">\Delta x</script> and <span class="MathJax_Preview"><img src="Session8_eq48211.png" alt="$\Delta t$"></span><script type="math/tex">\Delta t</script> should always be positive, it follows that there  remains still one stability criterion:</p><p><span class="MathJax_Preview"><img src="Session8_eq07377.png" alt="$$ \displaystyle \mathrm{Pe}\equiv  \frac{a\Delta x}{b }<2 $$"></span><script type="math/tex"> \displaystyle \mathrm{Pe}\equiv  \frac{a\Delta x}{b }<2 </script></p><p>To evaluate and compare the ITCS scheme to the ETCS scheme and the analytical solution we need to make the following modifications to ADEStudy.m.</p><p>First we need to add a term called <tt>Scheme</tt> as an input argument to the <tt>FDSol</tt> subfunction. This can be done by modifying the start of the subfunction to read as follows.</p><pre class="language-matlab"><span class="keyword">function</span> u=FDSol(xI,tI,a,b,uI,u0,Pe,Cr,Scheme)
+</pre><p>The term, <tt>Scheme</tt>, can be set to <tt>'ITCS'</tt> or <tt>'ETCS'</tt>. This in turn can be used to dictate which expressions should be used to calculate the <span class="MathJax_Preview"><img src="Session8_eq31461.png" alt="$A$"></span><script type="math/tex">A</script>, <span class="MathJax_Preview"><img src="Session8_eq73617.png" alt="$B$"></span><script type="math/tex">B</script> and <span class="MathJax_Preview"><img src="Session8_eq22407.png" alt="$C$"></span><script type="math/tex">C</script> coefficients. To enable this flexibility replace the code:</p><pre class="language-matlab"><span class="comment">%Determine A, B and C coefficients</span>
+A=a*dt/2/dx+b*dt/dx^2;
+B=1-2*b*dt/dx^2;
+C=-a*dt/2/dx+b*dt/dx^2;
+</pre><p>in the  <tt>FDSol</tt> subfunction with:</p><pre class="language-matlab"><span class="comment">%Determine A, B and C coefficients</span>
+<span class="keyword">switch</span> Scheme
+    <span class="keyword">case</span> <span class="string">'ETCS'</span>
+        <span class="comment">%Explicit time-stepping central difference in space</span>
+        A=a*dt/2/dx+b*dt/dx^2;
+        B=1-2*b*dt/dx^2;
+        C=-a*dt/2/dx+b*dt/dx^2;
+    <span class="keyword">case</span> <span class="string">'ITCS'</span>
+        <span class="comment">%Implicit time-stepping central difference in space</span>
+        A=-a*dt/2/dx-b*dt/dx^2;
+        B=1+2*b*dt/dx^2;
+        C=a*dt/2/dx-b*dt/dx^2;
+<span class="keyword">end</span>
+</pre><p>The above modification allows the use of <tt>Scheme</tt> to determine whether the user requires the ETCS or the ITCS scheme. Based on that information, the <tt>switch</tt> function can select the appropiate set of expressions for the <span class="MathJax_Preview"><img src="Session8_eq31461.png" alt="$A$"></span><script type="math/tex">A</script>, <span class="MathJax_Preview"><img src="Session8_eq73617.png" alt="$B$"></span><script type="math/tex">B</script> and <span class="MathJax_Preview"><img src="Session8_eq22407.png" alt="$C$"></span><script type="math/tex">C</script> coefficients. Read about <tt>switch</tt> in the help documentation to learn more about <tt>switch</tt> and how it can be used.</p><p>Again it should be noted that the <span class="MathJax_Preview"><img src="Session8_eq31461.png" alt="$A$"></span><script type="math/tex">A</script>, <span class="MathJax_Preview"><img src="Session8_eq73617.png" alt="$B$"></span><script type="math/tex">B</script> and <span class="MathJax_Preview"><img src="Session8_eq22407.png" alt="$C$"></span><script type="math/tex">C</script> coefficients represent the values of the first, second and third diagonals of a tridiagonal Jacobian matrix, <span class="MathJax_Preview"><img src="Session8_eq16246.png" alt="$\mathbf{J}$"></span><script type="math/tex">\mathbf{J}</script>. But for the ITCS scheme, <span class="MathJax_Preview"><img src="Session8_eq16246.png" alt="$\mathbf{J}$"></span><script type="math/tex">\mathbf{J}</script> is defined by the formula</p><p><span class="MathJax_Preview"><img src="Session8_eq08583.png" alt="$$ \mathbf{u}_{n}=\mathbf{J}\mathbf{u}_{n+1} $$"></span><script type="math/tex"> \mathbf{u}_{n}=\mathbf{J}\mathbf{u}_{n+1} </script></p><p>MATLAB's left divide operator can be used  to solve such a system of linear equations. For example, <tt>x=A\B</tt> solves the system of linear equations <tt>A*x=B</tt>.</p><p>To implement the above equation replace</p><pre class="language-matlab"><span class="comment">%Solve problem</span>
+<span class="keyword">for</span> n=1:Nt-1
+    u(:,n+1)=J*u(:,n);
+<span class="keyword">end</span>
+</pre><p>with</p><pre class="language-matlab"><span class="comment">%Solve problem</span>
+<span class="keyword">switch</span> Scheme(1:2)
+    <span class="keyword">case</span> <span class="string">'ET'</span>
+        <span class="comment">%Explicit time-stepping</span>
+        <span class="keyword">for</span> n=1:Nt-1
+            u(:,n+1)=J*u(:,n);
+        <span class="keyword">end</span>
+    <span class="keyword">case</span> <span class="string">'IT'</span>
+        <span class="comment">%Implicit time-stepping</span>
+        <span class="keyword">for</span> n=1:Nt-1
+            u(:,n+1)=J\u(:,n);
+        <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p>Note that we only need to use the first two characters of the string contained in <tt>Scheme</tt>, because the above code is only concerned with whether the scheme involves implicit time-stepping (i.e., <tt>'IT'</tt>) or explicit time-stepping (i.e., <tt>'ET'</tt>).</p><p>To compare the analytical solution with ETCS and ITCS schemes collectively, replace the following code within the main function</p><pre class="language-matlab"><span class="comment">%Evaluate the finite difference solution</span>
+uFD=FDSol(x,t,a,b,uI,u0,Pe,Cr);
+</pre><p>with</p><pre class="language-matlab"><span class="comment">%Evaluate the explicit time-stepping with central differences in space scheme</span>
+uFD(:,1)=FDSol(x,t,a,b,uI,u0,Pe,Cr,<span class="string">'ETCS'</span>);
+<span class="comment">%Evaluate the implicit time-stepping with central differences in space scheme</span>
+uFD(:,2)=FDSol(x,t,a,b,uI,u0,Pe,Cr,<span class="string">'ITCS'</span>);
+</pre><p>and update the legend appropriately.</p><p>Run the modified script-file and compare the results from the analytical solution and the finite difference solutions. Experiment by varying the specified value of <span class="MathJax_Preview"><img src="Session8_eq16432.png" alt="$\mathrm{Pe}$"></span><script type="math/tex">\mathrm{Pe}</script> and <span class="MathJax_Preview"><img src="Session8_eq20934.png" alt="$\mathrm{Cr}$"></span><script type="math/tex">\mathrm{Cr}</script>.</p><h2>ITBS - Implicit time-stepping with backward differences<a name="6"></a></h2><p>If we consider an Euler implicit time-stepping scheme and use a backward difference approximation for the <span class="MathJax_Preview"><img src="Session8_eq80180.png" alt="$\partial u/\partial x$"></span><script type="math/tex">\partial u/\partial x</script> term, ignoring all the truncation errors associated with the Taylor expansions, the ADE can then be written as</p><p><span class="MathJax_Preview"><img src="Session8_eq48601.png" alt="$$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +a\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta x}\right)-b\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta x^2}\right)=0 $$"></span><script type="math/tex"> \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +a\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta x}\right)-b\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta x^2}\right)=0 </script> ___(3c)</p><p>which can be rearranged to get</p><p><span class="MathJax_Preview"><img src="Session8_eq81088.png" alt="$$ u_{i,n}=A u_{i-1,n+1}+B u_{i,n+1} + C u_{i+1,n+1} $$"></span><script type="math/tex"> u_{i,n}=A u_{i-1,n+1}+B u_{i,n+1} + C u_{i+1,n+1} </script></p><p>where</p><p><span class="MathJax_Preview"><img src="Session8_eq75224.png" alt="$$ \displaystyle A=-\frac{a\Delta t}{ \Delta x}-\frac{b\Delta t}{\Delta x^2},&#xA;\quad&#xA;B=1+\frac{a\Delta t}{ \Delta x}+\frac{2b\Delta t}{\Delta x^2},&#xA;\quad&#xA;C=-\frac{b\Delta t}{\Delta x^2} $$"></span><script type="math/tex"> \displaystyle A=-\frac{a\Delta t}{ \Delta x}-\frac{b\Delta t}{\Delta x^2},
+\quad
+B=1+\frac{a\Delta t}{ \Delta x}+\frac{2b\Delta t}{\Delta x^2},
+\quad
+C=-\frac{b\Delta t}{\Delta x^2} </script></p><p>from which it can be seen that this scheme is unconditionally stable.</p><p>Hereafter this scheme will be referred to as the ITBS scheme.</p><h2>ETBS - Explicit time-stepping with backward differences<a name="7"></a></h2><p>If we consider an Euler explicit time-stepping scheme and use a backward difference approximation for the <span class="MathJax_Preview"><img src="Session8_eq80180.png" alt="$\partial u/\partial x$"></span><script type="math/tex">\partial u/\partial x</script> term, ignoring all the truncation errors associated with the Taylor expansions, the ADE can then be written as</p><p><span class="MathJax_Preview"><img src="Session8_eq88307.png" alt="$$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +a\left(\frac{u_{i,n}-u_{i-1,n}}{ \Delta x}\right)-b\left(\frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta x^2}\right)=0 $$"></span><script type="math/tex"> \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +a\left(\frac{u_{i,n}-u_{i-1,n}}{ \Delta x}\right)-b\left(\frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta x^2}\right)=0 </script> ___(3d)</p><p>which can be rearranged to get</p><p><span class="MathJax_Preview"><img src="Session8_eq28660.png" alt="$$ u_{i,n+1}=A u_{i-1,n}+B u_{i,n} + C u_{i+1,n} $$"></span><script type="math/tex"> u_{i,n+1}=A u_{i-1,n}+B u_{i,n} + C u_{i+1,n} </script></p><p>where</p><p><span class="MathJax_Preview"><img src="Session8_eq89286.png" alt="$$ \displaystyle A=\frac{a\Delta t}{ \Delta x}+\frac{b\Delta t}{\Delta x^2},&#xA;\quad&#xA;B=1-\frac{a\Delta t}{ \Delta x}-\frac{2b\Delta t}{\Delta x^2},&#xA;\quad&#xA;C=\frac{b\Delta t}{\Delta x^2} $$"></span><script type="math/tex"> \displaystyle A=\frac{a\Delta t}{ \Delta x}+\frac{b\Delta t}{\Delta x^2},
+\quad
+B=1-\frac{a\Delta t}{ \Delta x}-\frac{2b\Delta t}{\Delta x^2},
+\quad
+C=\frac{b\Delta t}{\Delta x^2} </script></p><p>from which it can be seen that this scheme is conditionally stable providing</p><p><span class="MathJax_Preview"><img src="Session8_eq61220.png" alt="$$ \displaystyle  \mathrm{Cr}<\frac{1}{2+\mathrm{Pe}} $$"></span><script type="math/tex"> \displaystyle  \mathrm{Cr}<\frac{1}{2+\mathrm{Pe}} </script></p><p>Hereafter this scheme will be referred to as the ETBS scheme.</p><h2>Classroom Assignment - Part 1<a name="8"></a></h2><p>Modify the ADEStudy.m file further to also include and compare the ITBS and ETBS schemes. Generate a single figure overlaying the plots of concentration against distance using each of the different schemes. How do they compare with the results from the analytical solution?</p><h2>Numerical diffusion<a name="9"></a></h2><p>It is apparent that the stability criteria for the different schemes listed above do not necessarily to lead to accurate solutions. If you set <span class="MathJax_Preview"><img src="Session8_eq61651.png" alt="$\mathrm{Pe}=2$"></span><script type="math/tex">\mathrm{Pe}=2</script> and <span class="MathJax_Preview"><img src="Session8_eq50522.png" alt="$\mathrm{Cr}=1/(2+\mathrm{Pe})$"></span><script type="math/tex">\mathrm{Cr}=1/(2+\mathrm{Pe})</script>, you will see that all the finite difference solutions overestimate the amount of diffusion taking place, with the exception of the ETCS scheme.</p><p>It is possible to determine exactly how much the different schemes are overestimating the diffusion by consideration of the truncation errors in the Taylor expansions provided earlier.</p><p><i>The ETCS scheme</i></p><p>Consider again the ETCS scheme (i.e., Eq. (3a)). Substituting Eqs. (2a), (2b) and (2e) into Eq. (3a) whilst retaining the truncation errors leads to</p><p><span class="MathJax_Preview"><img src="Session8_eq21576.png" alt="$$ \displaystyle \frac{\partial u}{\partial t} +\frac{\Delta t}{2}\frac{\partial ^2 u}{\partial t^2} + a\frac{\partial u}{\partial x}- b\frac{\partial ^2 u}{\partial x^2} =O(\Delta x^2,\Delta t^2) $$"></span><script type="math/tex"> \displaystyle \frac{\partial u}{\partial t} +\frac{\Delta t}{2}\frac{\partial ^2 u}{\partial t^2} + a\frac{\partial u}{\partial x}- b\frac{\partial ^2 u}{\partial x^2} =O(\Delta x^2,\Delta t^2) </script> ___(4a)</p><p>Now consider Eq. (1), it follows that</p><p><span class="MathJax_Preview"><img src="Session8_eq18857.png" alt="$$ \displaystyle \frac{\partial ^2 u}{\partial t^2}=\frac{\partial}{\partial t}&#xA;\left(-a\frac{\partial u}{\partial x}+b\frac{\partial ^2 u}{\partial x^2}\right) $$"></span><script type="math/tex"> \displaystyle \frac{\partial ^2 u}{\partial t^2}=\frac{\partial}{\partial t}
+\left(-a\frac{\partial u}{\partial x}+b\frac{\partial ^2 u}{\partial x^2}\right) </script></p><p>After some further rearranging (and recalling that <span class="MathJax_Preview"><img src="Session8_eq34276.png" alt="$a$"></span><script type="math/tex">a</script> and <span class="MathJax_Preview"><img src="Session8_eq28812.png" alt="$b$"></span><script type="math/tex">b</script> are constants) it can be further shown that</p><p><span class="MathJax_Preview"><img src="Session8_eq83364.png" alt="$$ \displaystyle \frac{\partial ^2 u}{\partial t^2}=a^2\frac{\partial ^2 u}{\partial x^2} -2ab\frac{\partial ^3 u}{\partial x^3}+b^2 \frac{\partial ^4 u}{\partial x^4} $$"></span><script type="math/tex"> \displaystyle \frac{\partial ^2 u}{\partial t^2}=a^2\frac{\partial ^2 u}{\partial x^2} -2ab\frac{\partial ^3 u}{\partial x^3}+b^2 \frac{\partial ^4 u}{\partial x^4} </script> ___(4b)</p><p>which on substitution into Eq. (4a) leads to</p><p><span class="MathJax_Preview"><img src="Session8_eq60162.png" alt="$$ \displaystyle \frac{\partial u}{\partial t}&#xA;+ a\frac{\partial u}{\partial x}-&#xA;\left(b-\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}&#xA;=ab\Delta t\frac{\partial ^3 u}{\partial x^3}&#xA;-\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}+O(\Delta x^2,\Delta t^2) $$"></span><script type="math/tex"> \displaystyle \frac{\partial u}{\partial t}
++ a\frac{\partial u}{\partial x}-
+\left(b-\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}
+=ab\Delta t\frac{\partial ^3 u}{\partial x^3}
+-\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}+O(\Delta x^2,\Delta t^2) </script></p><p>from which it can be seen that the ETCS scheme gives rise to a numerical diffusion, <span class="MathJax_Preview"><img src="Session8_eq42206.png" alt="$b_{num}$"></span><script type="math/tex">b_{num}</script>, of magnitude</p><p><span class="MathJax_Preview"><img src="Session8_eq80864.png" alt="$$ \displaystyle b_{num}=-\frac{a^2\Delta t }{2}=-\frac{b \mathrm{Pe}^2\mathrm{Cr}}{2}&#xA;$$"></span><script type="math/tex"> \displaystyle b_{num}=-\frac{a^2\Delta t }{2}=-\frac{b \mathrm{Pe}^2\mathrm{Cr}}{2}
+</script></p><p>which is negative, hence explaining why ETCS appears to underestimate the amount of diffusion predicted by the analytical solution.</p><p><i>The ITCS scheme</i></p><p>Consider again the ITCS scheme (i.e., Eq. (3b)). Substituting Eqs. (2a), (2b) and (2d) into Eq. (3b) and then substituting Eq. (4b), whilst retaining the truncation errors, leads to</p><p><span class="MathJax_Preview"><img src="Session8_eq81161.png" alt="$$ \displaystyle \frac{\partial u}{\partial t}&#xA;+ a\frac{\partial u}{\partial x}-&#xA;\left(b+\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}&#xA;=\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}-ab\Delta t\frac{\partial ^3 u}{\partial x^3}&#xA;+O(\Delta x^2,\Delta t^2) $$"></span><script type="math/tex"> \displaystyle \frac{\partial u}{\partial t}
++ a\frac{\partial u}{\partial x}-
+\left(b+\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}
+=\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}-ab\Delta t\frac{\partial ^3 u}{\partial x^3}
++O(\Delta x^2,\Delta t^2) </script></p><p>from which it can be seen that the ITCS scheme gives rise to a numerical diffusion, <span class="MathJax_Preview"><img src="Session8_eq42206.png" alt="$b_{num}$"></span><script type="math/tex">b_{num}</script>, of magnitude</p><p><span class="MathJax_Preview"><img src="Session8_eq08176.png" alt="$$ \displaystyle b_{num}=\frac{a^2\Delta t }{2}=\frac{b \mathrm{Pe}^2\mathrm{Cr}}{2}&#xA;$$"></span><script type="math/tex"> \displaystyle b_{num}=\frac{a^2\Delta t }{2}=\frac{b \mathrm{Pe}^2\mathrm{Cr}}{2}
+</script></p><p><i>The ITBS scheme</i></p><p>Consider again the ITBS scheme (i.e., Eq. (3c)). Substituting Eqs. (2a), (2c) and (2d) into Eq. (3c) and then substituting Eq. (4b), whilst retaining the truncation errors, leads to</p><p><span class="MathJax_Preview"><img src="Session8_eq44178.png" alt="$$ \displaystyle \frac{\partial u}{\partial t}&#xA;+ a\frac{\partial u}{\partial x}-&#xA;\left(b+\frac{a\Delta x}{2}+\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}&#xA;=\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}-ab\Delta t\frac{\partial ^3 u}{\partial x^3}&#xA;+O(\Delta x^2,\Delta t^2) $$"></span><script type="math/tex"> \displaystyle \frac{\partial u}{\partial t}
++ a\frac{\partial u}{\partial x}-
+\left(b+\frac{a\Delta x}{2}+\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}
+=\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}-ab\Delta t\frac{\partial ^3 u}{\partial x^3}
++O(\Delta x^2,\Delta t^2) </script></p><p>from which it can be seen that the ITBS scheme gives rise to a numerical diffusion, <span class="MathJax_Preview"><img src="Session8_eq42206.png" alt="$b_{num}$"></span><script type="math/tex">b_{num}</script>, of magnitude</p><p><span class="MathJax_Preview"><img src="Session8_eq16633.png" alt="$$ \displaystyle b_{num}=\frac{a\Delta x}{2}+\frac{a^2\Delta t }{2}=\frac{b \mathrm{Pe}(1+\mathrm{Pe}\mathrm{Cr})}{2}&#xA;$$"></span><script type="math/tex"> \displaystyle b_{num}=\frac{a\Delta x}{2}+\frac{a^2\Delta t }{2}=\frac{b \mathrm{Pe}(1+\mathrm{Pe}\mathrm{Cr})}{2}
+</script></p><p><i>The ETBS scheme</i></p><p>Consider again the ETBS scheme (i.e., Eq. (3d)). Substituting Eqs. (2a), (2c) and (2e) into Eq. (3d) and then substituting Eq. (4b), whilst retaining the truncation errors, leads to</p><p><span class="MathJax_Preview"><img src="Session8_eq35764.png" alt="$$ \displaystyle \frac{\partial u}{\partial t}&#xA;+ a\frac{\partial u}{\partial x}-&#xA;\left(b+\frac{a\Delta x}{2}-\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}&#xA;=ab\Delta t\frac{\partial ^3 u}{\partial x^3}&#xA;-\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}+O(\Delta x^2,\Delta t^2) $$"></span><script type="math/tex"> \displaystyle \frac{\partial u}{\partial t}
++ a\frac{\partial u}{\partial x}-
+\left(b+\frac{a\Delta x}{2}-\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}
+=ab\Delta t\frac{\partial ^3 u}{\partial x^3}
+-\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}+O(\Delta x^2,\Delta t^2) </script></p><p>from which it can be seen that the ETBS scheme gives rise to a numerical diffusion, <span class="MathJax_Preview"><img src="Session8_eq42206.png" alt="$b_{num}$"></span><script type="math/tex">b_{num}</script>, of magnitude</p><p><span class="MathJax_Preview"><img src="Session8_eq03435.png" alt="$$ \displaystyle b_{num}=\frac{a\Delta x}{2}-\frac{a^2\Delta t }{2}=\frac{b \mathrm{Pe}(1-\mathrm{Pe}\mathrm{Cr})}{2}&#xA;$$"></span><script type="math/tex"> \displaystyle b_{num}=\frac{a\Delta x}{2}-\frac{a^2\Delta t }{2}=\frac{b \mathrm{Pe}(1-\mathrm{Pe}\mathrm{Cr})}{2}
+</script></p><h2>Classroom Assignment - Part 2<a name="10"></a></h2><p>1) Modify the ADEStudy.m file further to also evaluate the analytical solution with <span class="MathJax_Preview"><img src="Session8_eq07053.png" alt="$b=b+b_{num}$"></span><script type="math/tex">b=b+b_{num}</script> using the four different values of <span class="MathJax_Preview"><img src="Session8_eq42206.png" alt="$b_{num}$"></span><script type="math/tex">b_{num}</script> associated with the four finite difference schemes discussed above. Plot the results as dot markers over the finite difference results. How effective are the expressions for <span class="MathJax_Preview"><img src="Session8_eq42206.png" alt="$b_{num}$"></span><script type="math/tex">b_{num}</script> at predicting the diffusion associated with each of the finite difference schemes? Which finite difference scheme do you think is best and why?</p><p>2) Solve the above problem using <tt>ode45</tt> for the time integration and try using central differences and then backward differences for the <span class="MathJax_Preview"><img src="Session8_eq80180.png" alt="$\partial u/\partial x$"></span><script type="math/tex">\partial u/\partial x</script> term. Compare your results with those from the other finite difference schemes. Also, derive expressions for the numerical diffusion associated with the two new schemes and check these work by evaluating the analytical solution with the additional diffusion terms (as in part 2 of the classroom assignment above).</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% NNESMO: Session 8 - Stability and numerical diffusion
+%
+% Dr Simon A Mathias
+%
+% Department of Earth Sciences
+%
+% Durham University
+%
+%% This session's learning objectives
+%
+% At the end of this session you should be able to:
+%
+% * Derive multiple finite difference solutions for the advection diffusion
+% equation.
+% * Speculate about stability criteria by assessing the sign of finite difference 
+% coefficients.
+% * Calculate numerical diffusion due to different finite difference schemes
+% using Taylor expansions.
+%
+%% The advection diffusion equation (ADE)
+%
+% Most of the problems considered up till now can be thought of as
+% representing special forms of the so-called advection diffusion equation
+% (ADE)
+%
+% $$ \displaystyle \frac{\partial u}{\partial t}+a\frac{\partial u}{\partial
+% x}-b\frac{\partial^2 u}{\partial x^2}=0 $$ _____(1)
+%
+% where $u$ is the dependent variable, $x$ is distance,
+% $t$ is time and $a$ and $b$ are constant parameters.
+%
+% We specifcally solved the ADE when
+% considering the previous pollution transport scenario. Recall it was
+% found that the ADE exhibited some numerical instabilities when high
+% values of $a$ were applied. The reason that the ADE is challenging to
+% solve in this context  
+% is due to its composite hyperbolic and parabolic nature.
+%
+% When $a=0$, the ADE reduces to a parabolic partial differential equation
+% (PDE) identical to the groundwater flow equation, chemical diffusion 
+% equation and heat conduction equation considered previously. A parabolic
+% equation is characterized by having all time derivatives of first-order
+% and all spatial derivatives of second-order.
+% Such equations are relatively
+% straightforward to solve using finite difference methods.
+%
+% When $b=0$, the ADE reduces to a hyperbolic PDE, similar to the wave
+% equation. Hyperbolic equations are characterised 
+% by having both time and space derivatives of the same order.
+% Hyperbolic equations can be solved analytically using the so-called
+% "Method of Characteristics" (MOC).
+%
+% When both $a$ and $b$ are non-zero, the ADE cannot be solved using MOC and 
+% it is also challenging to solve using finite differences. Situations when 
+% both $a$ and $b$ are non-zero frequently come up in Earth Science. This is a
+% particular problem when seeking to solve diffusion type equations, which
+% have spatially varying diffusion coefficients.  For example, consider the situation:
+%
+% $$ \displaystyle \frac{\partial c}{\partial t}=\frac{\partial}{\partial x}
+% \left(E \frac{\partial c}{\partial x}\right)=\frac{\partial E}{\partial
+% x}\frac{\partial c}{\partial x}+E\frac{\partial^2 c}{\partial x^2} $$
+%
+% In this session we
+% will examine why such difficulties occur and explore how some of the
+% consequences can be dealt with.
+%
+% For the next few examples, the following initial and boundary
+% conditions are considered:
+% 
+% $$ \begin{array}{lll}
+% u=u_I, & 0< x \leq L, & t=0\\
+% u=u_0, & x=0, & t>0\\
+% u=u_I, & x=L, & t>0\\
+% \end{array} $$
+%  
+% where $u_I$ and $u_0$ represent  specified values of $u$ and $L$ is
+% the length of the domain.
+%
+% For the special case where $L\rightarrow\infty$, the above
+% system of equations can be solved exactly to obtain
+% 
+% $$ \displaystyle \frac{u-u_I}{u_0-u_I}=\frac{1}{2}\left[
+% \mathrm{erfc}\left(\frac{x-at}{2\sqrt{bt}}\right)
+% +\exp\left(\frac{ax}{b}\right)
+% \mathrm{erfc}\left(\frac{x+at}{2\sqrt{bt}}\right)
+% \right]
+% $$
+%
+% To evaluate the analytical solution, type in the following code in a 
+% single script-file and save it in an appropriate place as "ADEStudy.m".
+%
+%   function ADEStudy
+%   %A sequence of different subfunctions to explore stability and
+%   %numerical diffusion associated with finite difference solutions of 
+%   %the advection diffusion equation.
+%
+%   %Define model parameters
+%   L=2; %m
+%   a=1; %m/day
+%   b=0.01; %m^2/day
+%   uI=0; %mg/l
+%   u0=1; %mg/l
+%  
+%   %Define location of points for plotting
+%   x=linspace(0,L,50);
+%   %Define values of time to be used for plotting
+%   t=[1];
+%   
+%   %Evaluate the exact solution
+%   uA=AnalSol(x,t,a,b,uI,u0);
+%
+%   %Plot results
+%   figure(1)
+%   hold off
+%   plot(x,uA,'ko')
+%   xlabel('Distance (m)')
+%   ylabel('Concentration (mg/l)')
+%   title('Concentration profile after one day')
+%   
+%   %**********************************************************************
+%    
+%   function u=AnalSol(x,t,a,b,uI,u0)
+%   %Subfunction containing the analytical solution
+%   [x,t]=ndgrid(x,t);
+%   Pe=a*x/b;
+%   F1=erfc((x-a*t)./2./sqrt(b*t))/2;
+%   F2=exp(Pe).*erfc((x+a*t)./2./sqrt(b*t))/2;
+%   F=F1+F2;
+%   ind=Pe>700;
+%   F(ind)=F1(ind);
+%   u=(u0-uI)*F+uI;
+%
+% The outline of the remainder of this session is as follows. First we
+% will derive a set of finite difference approximations using Taylor
+% expansions. Following on from this we will develop four different finite
+% difference solutions to the ADE along with associated stability
+% criteria. We will then use the Taylor expansions to derive expressions for the
+% numerical diffusion associated with each of the finite difference
+% schemes. Finally, we will develop a higher order time integration scheme
+% using |ode45| and compare this with the earlier first-order explicit and
+% implicit time-stepping schemes.
+%
+%% Taylor expansions and finite difference
+%
+% Consider a set of discrete points in time and space, $(x_i,t_n)$, 
+% where $x_i$ and $t_n$ represent the i-th point in space and n-th point 
+% in time, respectively. It is assumed that these discrete points are separated by
+% uniform intervals in both space and time of $\Delta x$
+% and $\Delta t$, respectively. The values of a function, $u(x,t)$, at the
+% locations of these discrete points can be written as $u_{i,n}= u(x_i,t_n)$.
+%
+% It is possible to derive finite difference approximations for the
+% derivatives of $u$ with respect to $x$ and $t$ by considering the Taylor
+% expansion:
+%
+% $$ \displaystyle u(t+\Delta t) = u(t) + \Delta t \frac{\partial u}{\partial t}+\frac{\Delta
+% t^2}{2!}\frac{\partial ^2 u}{\partial t^2}+\frac{\Delta t^3}{3!}\frac{\partial ^3
+% u}{\partial t^3}+O(\Delta t^4) $$
+%
+% from which it can be seen that:
+%
+% $$ \displaystyle u_{i,n+1} = u_{i,n} + \Delta t \left.\frac{\partial u}{\partial t}\right|_{i,n}
+% +\frac{\Delta t^2}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n}
+% +\frac{\Delta t^3}{3!}\left.\frac{\partial ^3
+% u}{\partial t^3}\right|_{i,n}+O(\Delta t^4) $$
+% 
+% $$ \displaystyle u_{i+1,n} = u_{i,n} + \Delta x \left.\frac{\partial u}{\partial x}\right|_{i,n}
+% +\frac{\Delta x^2}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}
+% +\frac{\Delta x^3}{3!}\left.\frac{\partial ^3 u}{\partial x^3}\right|_{i,n}
+% +O(\Delta x^4) $$
+%
+% It is also possible to state that
+% 
+% $$ \displaystyle u(t-\Delta t) = u(t) - \Delta t \frac{\partial u}{\partial t}+\frac{\Delta
+% t^2}{2!}\frac{\partial ^2 u}{\partial t^2}-\frac{\Delta t^3}{3!}\frac{\partial ^3
+% u}{\partial t^3}+O(\Delta t^4) $$
+% 
+% from which it can be seen that:
+% 
+% $$ \displaystyle u_{i,n} = u_{i,n+1} - \Delta t \left.\frac{\partial u}{\partial t}\right|_{i,n+1}+\frac{\Delta
+% t^2}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n+1}-\frac{\Delta t^3}{3!}\left.\frac{\partial ^3
+% u}{\partial t^3}\right|_{i,n+1}+O(\Delta t^4) $$
+% 
+% $$ \displaystyle u_{i-1,n} = u_{i,n} - \Delta x \left.\frac{\partial u}{\partial x}\right|_{i,n}+\frac{\Delta
+% x^2}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}-\frac{\Delta x^3}{3!}\left.\frac{\partial ^3
+% u}{\partial x^3}\right|_{i,n}+O(\Delta x^4) $$
+% 
+% Interestingly, it can also be seen that:
+% 
+% $$ \displaystyle u_{i+1,n}-u_{i-1,n} =2 \Delta x \left.\frac{\partial u}{\partial x}\right|_{i,n}+2\frac{\Delta x^3}{3!}\left.\frac{\partial ^3
+% u}{\partial x^3}\right|_{i,n}+O(\Delta x^4) $$
+% 
+% $$ \displaystyle u_{i+1,n}+u_{i-1,n} = 2u_{i,n}+2\frac{\Delta
+% x^2}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}+O(\Delta x^4)
+% $$
+% 
+% Rearranging the above set of equations leads to
+% the following set of finite difference approximations:
+% 
+% $$ \displaystyle \frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta x^2}
+% =\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}+O(\Delta
+% x^2) 
+% $$ _____(2a)
+% 
+% $$ \displaystyle \frac{u_{i+1,n}-u_{i-1,n}}{2 \Delta x}= \left.\frac{\partial
+% u}{\partial x}\right|_{i,n} +O(\Delta x^2) 
+% $$ _____(2b)
+% 
+% $$ \displaystyle \frac{u_{i,n}-u_{i-1,n}}{\Delta x} = \left.\frac{\partial
+% u}{\partial x}\right|_{i,n} -\frac{\Delta
+% x}{2!}\left.\frac{\partial ^2 u}{\partial x^2}\right|_{i,n}
+% +O(\Delta x^2) $$ _____(2c)
+% 
+% $$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} =  \left.\frac{\partial
+% u}{\partial t}\right|_{i,n+1} -\frac{\Delta
+% t}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n+1}
+% +O(\Delta t^2) $$ _____(2d)
+% 
+% $$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} =  \left.\frac{\partial
+% u}{\partial t}\right|_{i,n} +\frac{\Delta
+% t}{2!}\left.\frac{\partial ^2 u}{\partial t^2}\right|_{i,n}
+% +O(\Delta t^2) $$ _____(2e)
+%
+%% ETCS - Explicit time-stepping with central differences in space
+%
+% First we will develop an Euler explicit time-stepping scheme for the ADE 
+% problem described above and use a
+% central difference approximation for the $\partial u/\partial x$ term.
+% Ignoring all the truncation errors associated with the Taylor expansions,
+% the ADE can then be written as
+%
+% $$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t} +a\left(\frac{u_{i+1,n}-u_{i-1,n}}
+% {2 \Delta x}\right)
+% -b\left(\frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta x^2}\right)=0 $$ 
+% _____(3a)
+%
+% which can be rearranged to get
+%
+% $$ u_{i,n+1}=A u_{i-1,n}+B u_{i,n} + C u_{i+1,n} $$
+% 
+% where
+% 
+% $$ \displaystyle A=\frac{a\Delta t}{2 \Delta x}+\frac{b\Delta t}{\Delta x^2},
+% \quad
+% B=1-\frac{2b\Delta t}{\Delta x^2},
+% \quad
+% C=-\frac{a\Delta t}{2 \Delta x}+\frac{b\Delta t}{\Delta x^2} $$
+% 
+% Hereafter this scheme will be referred to as the ETCS scheme.
+%
+% For numerical stability of explicit time-stepping schemes to be ensured it is
+% generally found that the coefficients, $A$, $B$ and $C$, need
+% always to be positive. Given that $a$, $b$, $\Delta x$ and $\Delta
+% t$ should also always be positive, it follows that there are two
+% stability criteria for this scheme:
+% 
+% $$ \displaystyle \mathrm{Cr}\equiv \frac{b\Delta t}{\Delta x^2}<0.5 
+% \quad
+% \mathrm{and}
+% \quad
+% \mathrm{Pe}\equiv  \frac{a\Delta x}{b }<2 $$
+% 
+% where $\mathrm{Cr}$ and $\mathrm{Pe}$ are often referred
+% to as the Courant number and Peclet number, respectively.
+%
+% To evaluate the ETCS scheme add the following subfunction to ADEStudy.m:
+%
+%   %**********************************************************************
+%
+%   function u=FDSol(xI,tI,a,b,uI,u0,Pe,Cr)
+%   %Subfunction containing the finite difference solutions
+%
+%   %Determine the space-step and time-step using a specified
+%   %Courant and Peclet number
+%   dx=Pe*b/a;
+%   dt=Cr*dx^2/b;
+%   
+%   %Determine number of nodes to solve for
+%   Nx=ceil((xI(end)-xI(1))/dx)+1;
+%   Nt=ceil(tI(end)/dt)+1;
+%   
+%   %Determine the location of solution points in x and t
+%   x=[0:dx:dx*(Nx-1)]+xI(1);
+%   t=[0:dt:dt*(Nt-1)];
+%   
+%   %Initialise the solution matrix
+%   u=zeros(Nx,Nt);
+%   
+%   %Apply initial condition
+%   u(:,1)=uI;
+%   
+%   %Apply boundary conditions
+%   u(1,:)=u0;
+%   u(Nx,:)=uI;
+%   
+%   %Determine A, B and C coefficients
+%   A=a*dt/2/dx+b*dt/dx^2;
+%   B=1-2*b*dt/dx^2;
+%   C=-a*dt/2/dx+b*dt/dx^2;
+%   
+%   %Determine Jacobian matrix
+%   J=spdiags(ones(Nx,1)*[A B C],[-1 0 1],Nx,Nx);
+%
+%   %Apply boundary conditions
+%   J(1,:)=0;
+%   J(1,1)=1;
+%   J(Nx,:)=0;
+%   J(Nx,Nx)=1;
+%   
+%   %Solve problem
+%   for n=1:Nt-1
+%       u(:,n+1)=J*u(:,n);
+%   end
+%   
+%   %Interpolate solution to plotting points
+%   u=interp2(t,x',u,tI,xI');
+%
+% Note that the values of $\Delta x$ and $\Delta t$ are determined by
+% considering a specified Peclet and Courant number. Also note that the
+% solution is then interpolated to the values of $x$ and $t$ specified by
+% the input arguments of the sub-function. This removes the need to plot
+% all the solution points solved for, which can be excessive depending on
+% the Peclet number and Courant number specified.
+%
+% It is also interesting to see that the $A$, $B$ and $C$ coefficients represent
+% the values of the first, second and third diagonal of the 
+% Jacobian matrix, $\mathbf{J}$, defined in this case by the formula
+%
+% $$ \mathbf{u}_{n+1}=\mathbf{J}\mathbf{u}_{n} $$
+%
+% To evaluate the ETCS scheme, replace:
+%
+%   %Plot results
+%   figure(1)
+%   hold off
+%   plot(x,uA,'k')
+%   xlabel('Distance (m)')
+%   ylabel('Concentration (mg/l)')
+%   title('Concentration profile after one day')
+%
+% in the main function of ADEStudy.m with:
+%
+%   %Specify a Peclet number and Courant number
+%   Pe=2;
+%   Cr=0.5;
+%   
+%   %Evaluate the finite difference solution
+%   uFD=FDSol(x,t,a,b,uI,u0,Pe,Cr);
+%   
+%   %Plot results
+%   figure(1)
+%   hold off
+%   plot(x,uA,'k')
+%   hold on
+%   plot(x,uFD)
+%   xlabel('Distance (m)')
+%   ylabel('Concentration (mg/l)')
+%   title('Concentration profile after one day')
+%   legend('Analytical solution','Finite difference solution')
+%
+% Run the script-file and compare the results from the analytical solution
+% and the finite difference solution. Experiment by varying the specified
+% value of $\mathrm{Pe}$ and $\mathrm{Cr}$. Do the pre-determined stability 
+% criteria work? Does stability also ensure accuracy?
+%
+%% ITCS - Implicit time-stepping with central differences in space
+%
+% Here we will develop an Euler implicit time-stepping scheme and use a
+% central difference approximation for the $\partial u/\partial x$ term.
+% Ignoring all the truncation errors associated with the Taylor expansions,
+% the ADE can then be written as
+%
+% $$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t}
+% +a\left(\frac{u_{i+1,n+1}-u_{i-1,n+1}}{2 \Delta
+% x}\right)-b\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta
+% x^2}\right)=0 $$ _____(3b)
+%
+% which can be rearranged to get
+%
+% $$ u_{i,n}=A u_{i-1,n+1}+B u_{i,n+1} + C u_{i+1,n+1} $$
+% 
+% where
+% 
+% $$ \displaystyle A=-\frac{a\Delta t}{2 \Delta x}-\frac{b\Delta t}{\Delta x^2},
+% \quad
+% B=1+\frac{2b\Delta t}{\Delta x^2},
+% \quad
+% C=\frac{a\Delta t}{2 \Delta x}-\frac{b\Delta t}{\Delta x^2} $$
+% 
+% Hereafter this scheme will be referred to as the ITCS scheme.
+%
+% For numerical stability of implicit time-stepping schemes to
+% be ensured it is
+% generally found that the coefficients, $A$ and $C$ need
+% always to be negative whereas $B$ needs to be positive.
+% Given that $a$, $b$, $\Delta x$ and $\Delta
+% t$ should always be positive, it follows that there  remains still one
+% stability criterion:
+% 
+% $$ \displaystyle \mathrm{Pe}\equiv  \frac{a\Delta x}{b }<2 $$
+% 
+%
+% To evaluate and compare the ITCS scheme to the ETCS scheme and the
+% analytical solution we need to make the following modifications to ADEStudy.m.
+%
+% First we need to add a term called |Scheme| as an input argument to the 
+% |FDSol| subfunction. This can be done by modifying the start of the
+% subfunction to read as follows.
+%
+%   function u=FDSol(xI,tI,a,b,uI,u0,Pe,Cr,Scheme)
+%
+% The term, |Scheme|, can be set to |'ITCS'| or |'ETCS'|. This in turn
+% can be used to dictate which expressions should be used to calculate 
+% the $A$, $B$ and
+% $C$ coefficients. To enable this flexibility replace the code:
+%
+%   %Determine A, B and C coefficients
+%   A=a*dt/2/dx+b*dt/dx^2;
+%   B=1-2*b*dt/dx^2;
+%   C=-a*dt/2/dx+b*dt/dx^2;
+%
+% in the  |FDSol| subfunction with:
+%
+%   %Determine A, B and C coefficients
+%   switch Scheme
+%       case 'ETCS'
+%           %Explicit time-stepping central difference in space
+%           A=a*dt/2/dx+b*dt/dx^2;
+%           B=1-2*b*dt/dx^2;
+%           C=-a*dt/2/dx+b*dt/dx^2;
+%       case 'ITCS'
+%           %Implicit time-stepping central difference in space
+%           A=-a*dt/2/dx-b*dt/dx^2;
+%           B=1+2*b*dt/dx^2;
+%           C=a*dt/2/dx-b*dt/dx^2;
+%   end
+%
+% The above modification allows the use of |Scheme| to
+% determine whether the user requires the ETCS or the ITCS scheme. Based on
+% that information, the |switch| function can select the appropiate set of
+% expressions for the $A$, $B$ and $C$ coefficients. Read about |switch| in the help
+% documentation to learn more about |switch| and how it can be used.
+%
+% Again it should be noted that the $A$, $B$ and $C$ coefficients represent
+% the values of the first, second and third diagonals of a tridiagonal
+% Jacobian matrix, $\mathbf{J}$. But for the ITCS scheme, $\mathbf{J}$ is 
+% defined by the formula
+%
+% $$ \mathbf{u}_{n}=\mathbf{J}\mathbf{u}_{n+1} $$
+%
+% MATLAB's left divide operator can be used  to solve such a system of linear
+% equations. For example, |x=A\B| solves the system of linear equations
+% |A*x=B|.
+%
+% To implement the above equation replace
+%
+%   %Solve problem
+%   for n=1:Nt-1
+%       u(:,n+1)=J*u(:,n);
+%   end
+%
+% with
+%
+%   %Solve problem
+%   switch Scheme(1:2)
+%       case 'ET'
+%           %Explicit time-stepping
+%           for n=1:Nt-1
+%               u(:,n+1)=J*u(:,n);
+%           end
+%       case 'IT'
+%           %Implicit time-stepping
+%           for n=1:Nt-1
+%               u(:,n+1)=J\u(:,n);
+%           end
+%   end
+%
+% Note that we only need to use the first two characters of the string contained
+% in |Scheme|, because the above code is only concerned with whether the scheme
+% involves implicit time-stepping (i.e., |'IT'|) or explicit time-stepping
+% (i.e., |'ET'|).
+%
+% To compare the analytical solution with ETCS and ITCS schemes
+% collectively, replace the following code within the main function
+%
+%   %Evaluate the finite difference solution
+%   uFD=FDSol(x,t,a,b,uI,u0,Pe,Cr);
+%
+% with
+%
+%   %Evaluate the explicit time-stepping with central differences in space scheme
+%   uFD(:,1)=FDSol(x,t,a,b,uI,u0,Pe,Cr,'ETCS');
+%   %Evaluate the implicit time-stepping with central differences in space scheme
+%   uFD(:,2)=FDSol(x,t,a,b,uI,u0,Pe,Cr,'ITCS');
+%
+% and update the legend appropriately.
+%
+% Run the modified script-file and compare the results from the analytical solution
+% and the finite difference solutions. Experiment by varying the specified
+% value of $\mathrm{Pe}$ and $\mathrm{Cr}$.
+%
+%% ITBS - Implicit time-stepping with backward differences
+%
+% If we consider an Euler implicit time-stepping scheme and use a
+% backward difference approximation for the $\partial u/\partial x$ term,
+% ignoring all the truncation errors associated with the Taylor expansions,
+% the ADE can then be written as
+%
+% $$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t}
+% +a\left(\frac{u_{i,n+1}-u_{i-1,n+1}}{ \Delta
+% x}\right)-b\left(\frac{u_{i+1,n+1}-2u_{i,n+1}+u_{i-1,n+1}}{\Delta
+% x^2}\right)=0 $$ _____(3c)
+%
+% which can be rearranged to get
+%
+% $$ u_{i,n}=A u_{i-1,n+1}+B u_{i,n+1} + C u_{i+1,n+1} $$
+% 
+% where
+% 
+% $$ \displaystyle A=-\frac{a\Delta t}{ \Delta x}-\frac{b\Delta t}{\Delta x^2},
+% \quad
+% B=1+\frac{a\Delta t}{ \Delta x}+\frac{2b\Delta t}{\Delta x^2},
+% \quad
+% C=-\frac{b\Delta t}{\Delta x^2} $$
+%
+% from which it can be seen that this scheme is unconditionally stable.
+%
+% Hereafter this scheme will be referred to as the ITBS scheme.
+%
+%% ETBS - Explicit time-stepping with backward differences
+%
+% If we consider an Euler explicit time-stepping scheme and use a
+% backward difference approximation for the $\partial u/\partial x$ term,
+% ignoring all the truncation errors associated with the Taylor expansions,
+% the ADE can then be written as
+%
+% $$ \displaystyle \frac{u_{i,n+1}-u_{i,n}}{ \Delta t}
+% +a\left(\frac{u_{i,n}-u_{i-1,n}}{ \Delta
+% x}\right)-b\left(\frac{u_{i+1,n}-2u_{i,n}+u_{i-1,n}}{\Delta
+% x^2}\right)=0 $$ _____(3d)
+%
+% which can be rearranged to get
+%
+% $$ u_{i,n+1}=A u_{i-1,n}+B u_{i,n} + C u_{i+1,n} $$
+% 
+% where
+% 
+% $$ \displaystyle A=\frac{a\Delta t}{ \Delta x}+\frac{b\Delta t}{\Delta x^2},
+% \quad
+% B=1-\frac{a\Delta t}{ \Delta x}-\frac{2b\Delta t}{\Delta x^2},
+% \quad
+% C=\frac{b\Delta t}{\Delta x^2} $$
+%
+% from which it can be seen that this scheme is conditionally stable
+% providing
+%
+% $$ \displaystyle  \mathrm{Cr}<\frac{1}{2+\mathrm{Pe}} $$
+%
+% Hereafter this scheme will be referred to as the ETBS scheme.
+%
+%% Classroom Assignment - Part 1
+%
+% Modify the ADEStudy.m file further to also include and compare the ITBS
+% and ETBS schemes. Generate a single figure overlaying the plots of
+% concentration against distance using each of the different schemes. How
+% do they compare with the results from the analytical solution?
+%
+%% Numerical diffusion
+%
+% It is apparent that the stability criteria for the different schemes
+% listed above do not necessarily to lead to accurate solutions. If you set
+% $\mathrm{Pe}=2$ and $\mathrm{Cr}=1/(2+\mathrm{Pe})$, you will see that
+% all the finite difference solutions overestimate the amount of diffusion
+% taking place, with the exception of the ETCS scheme.
+%
+% It is possible to determine exactly how much the different schemes are
+% overestimating the diffusion by consideration of the truncation errors in
+% the Taylor expansions provided earlier.
+%
+% _The ETCS scheme_
+%
+% Consider again the ETCS scheme (i.e., Eq. (3a)). Substituting Eqs. (2a),
+% (2b) and (2e) into Eq. (3a) whilst retaining the truncation errors leads
+% to
+%
+% $$ \displaystyle \frac{\partial u}{\partial t}
+% +\frac{\Delta t}{2}\frac{\partial ^2 u}{\partial t^2}
+% + a\frac{\partial u}{\partial x}-
+% b\frac{\partial ^2 u}{\partial x^2}
+% =O(\Delta x^2,\Delta t^2) $$ _____(4a)
+%
+% Now consider Eq. (1), it follows that
+%
+% $$ \displaystyle \frac{\partial ^2 u}{\partial t^2}=\frac{\partial}{\partial t}
+% \left(-a\frac{\partial u}{\partial x}+b\frac{\partial ^2 u}{\partial x^2}\right) $$
+% 
+% After some further rearranging (and recalling that $a$ and $b$ are constants)
+% it can be further shown that
+% 
+% $$ \displaystyle \frac{\partial ^2 u}{\partial t^2}=a^2\frac{\partial ^2 u}{\partial x^2}
+% -2ab\frac{\partial ^3 u}{\partial x^3}+b^2 \frac{\partial ^4 u}{\partial
+% x^4} $$ _____(4b)
+% 
+% which on substitution into Eq. (4a) leads to
+% 
+% $$ \displaystyle \frac{\partial u}{\partial t}
+% + a\frac{\partial u}{\partial x}-
+% \left(b-\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}
+% =ab\Delta t\frac{\partial ^3 u}{\partial x^3}
+% -\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}+O(\Delta x^2,\Delta t^2) $$
+% 
+% from which it can be seen that the ETCS scheme gives rise to a
+% numerical diffusion, $b_{num}$, of magnitude
+%
+% $$ \displaystyle b_{num}=-\frac{a^2\Delta t }{2}=-\frac{b \mathrm{Pe}^2\mathrm{Cr}}{2}
+% $$
+%
+% which is negative, hence explaining why ETCS appears to
+% underestimate the amount of diffusion predicted by the analytical
+% solution.
+%
+% _The ITCS scheme_
+%
+% Consider again the ITCS scheme (i.e., Eq. (3b)). Substituting Eqs. (2a),
+% (2b) and (2d) into Eq. (3b) and then substituting Eq. (4b), whilst 
+% retaining the truncation errors, leads to
+%
+% $$ \displaystyle \frac{\partial u}{\partial t}
+% + a\frac{\partial u}{\partial x}-
+% \left(b+\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}
+% =\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}-ab\Delta t\frac{\partial ^3 u}{\partial x^3}
+% +O(\Delta x^2,\Delta t^2) $$
+%
+% from which it can be seen that the ITCS scheme gives rise to a
+% numerical diffusion, $b_{num}$, of magnitude
+%
+% $$ \displaystyle b_{num}=\frac{a^2\Delta t }{2}=\frac{b \mathrm{Pe}^2\mathrm{Cr}}{2}
+% $$
+%
+% _The ITBS scheme_
+%
+% Consider again the ITBS scheme (i.e., Eq. (3c)). Substituting Eqs. (2a),
+% (2c) and (2d) into Eq. (3c) and then substituting Eq. (4b), whilst 
+% retaining the truncation errors, leads to
+%
+% $$ \displaystyle \frac{\partial u}{\partial t}
+% + a\frac{\partial u}{\partial x}-
+% \left(b+\frac{a\Delta x}{2}+\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}
+% =\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}-ab\Delta t\frac{\partial ^3 u}{\partial x^3}
+% +O(\Delta x^2,\Delta t^2) $$
+%
+% from which it can be seen that the ITBS scheme gives rise to a
+% numerical diffusion, $b_{num}$, of magnitude
+%
+% $$ \displaystyle b_{num}=\frac{a\Delta x}{2}+\frac{a^2\Delta t }{2}=\frac{b \mathrm{Pe}(1+\mathrm{Pe}\mathrm{Cr})}{2}
+% $$
+%
+% _The ETBS scheme_
+%
+% Consider again the ETBS scheme (i.e., Eq. (3d)). Substituting Eqs. (2a),
+% (2c) and (2e) into Eq. (3d) and then substituting Eq. (4b), whilst 
+% retaining the truncation errors, leads to
+%
+% $$ \displaystyle \frac{\partial u}{\partial t}
+% + a\frac{\partial u}{\partial x}-
+% \left(b+\frac{a\Delta x}{2}-\frac{a^2\Delta t }{2}\right)\frac{\partial ^2 u}{\partial x^2}
+% =ab\Delta t\frac{\partial ^3 u}{\partial x^3}
+% -\frac{b^2 \Delta t}{2}\frac{\partial ^4 u}{\partial x^4}+O(\Delta x^2,\Delta t^2) $$
+%
+% from which it can be seen that the ETBS scheme gives rise to a
+% numerical diffusion, $b_{num}$, of magnitude
+%
+% $$ \displaystyle b_{num}=\frac{a\Delta x}{2}-\frac{a^2\Delta t }{2}=\frac{b \mathrm{Pe}(1-\mathrm{Pe}\mathrm{Cr})}{2}
+% $$
+%
+%% Classroom Assignment - Part 2
+%
+% 1) Modify the ADEStudy.m file further to also evaluate the analytical
+% solution with $b=b+b_{num}$ using the four different values of $b_{num}$
+% associated with the four finite difference schemes discussed above. Plot
+% the results as dot markers over the finite difference results. How
+% effective are the expressions for $b_{num}$ at predicting the diffusion
+% associated with each of the finite difference schemes? Which finite
+% difference scheme do you think is best and why?
+%
+% 2) Solve the above problem using |ode45| for the time integration and try
+% using central differences and then backward differences for the $\partial
+% u/\partial x$ term. Compare your results with those from the other finite
+% difference schemes. Also, derive expressions for the numerical diffusion
+% associated with the two new schemes and check these work by evaluating
+% the analytical solution with the additional diffusion terms (as in part 2
+% of the classroom assignment above).
+
+##### SOURCE END #####
+--></body></html>
