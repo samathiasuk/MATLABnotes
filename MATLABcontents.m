@@ -6,6 +6,9 @@
 %
 % Durham University
 %
+% Citation: Mathias, S. A. (2023) MATLAB Programming for Engineering and
+% Science Students. Durham University. https://samathiasuk.github.io/MATLABnotes/html/MATLABcontents.html
+%
 %% <https://samathiasuk.github.io/MATLABnotes/html/MATLABsession1.html Session 1 - Arrays and plotting>
 %
 % * Input data into a 1D array.
