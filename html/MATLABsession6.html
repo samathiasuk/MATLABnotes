@@ -1,0 +1,671 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MATLAB Notes: Session 6 - Solving PDEs using ODE solvers</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-07-25"><meta name="DC.source" content="MATLABsession6.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>MATLAB Notes: Session 6 - Solving PDEs using ODE solvers</h1><!--introduction--><p>Simon Mathias</p><p>Department of Engineering</p><p>Durham University</p><p><a href="https://samathiasuk.github.io/MATLABnotes/html/MATLABcontents.html">Return to main contents page</a></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Learning outcomes</a></li><li><a href="#2">Groundwater flow in a confined aquifer</a></li><li><a href="#3">Spatial discretisation using finite differences</a></li><li><a href="#4">Development of the solution code</a></li><li><a href="#5">Plotting the results and comparing to an analytical solution</a></li><li><a href="#6">Stiff and non-stiff problems</a></li><li><a href="#7">Specifying the Jacobian pattern</a></li><li><a href="#8">Classroom assignment</a></li></ul></div><h2>Learning outcomes<a name="1"></a></h2><p>At the end of the session you should be able to:</p><div><ul><li>Use a finite difference spatial discretisation to transform a partial differential equation (PDE) into a set of coupled ordinary differential equations (ODE).</li><li>Solve the one-dimensional advection dispersion equation using <tt>ode45</tt> or <tt>ode15s</tt>.</li><li>Apply a non-uniform grid spacing.</li><li>Understand the meaning of stiff and non-stiff problems.</li><li>Determine the Jacobian pattern associated with a PDE problem.</li><li>Solve PDEs using <tt>ode15s</tt>.</li></ul></div><h2>Groundwater flow in a confined aquifer<a name="2"></a></h2><p>A confined aquifer is bounded to the West by a lake and to the East by an impermeable fault zone. The aquifer is homogenous and isotropic and characterised by a transmissivity of 800 <span class="MathJax_Preview"><img src="MATLABsession6_eq04521165611601621891.png" alt="$\mathrm{m}^{2}\mathrm{day}^{-1}$"></span><script type="math/tex">\mathrm{m}^{2}\mathrm{day}^{-1}</script> and a storativity of 0.01. The edge of the lake lies parallel to the fault zone and is separated by a distance of 1600 m. Initially the lake level is 50  mAOD (metres above ordinance datum). After a significant episode of snow melt in the mountains above, the water level in the lake is suddenly raised to 53 mAOD.</p><p>The governing equation for one dimensional groundwater flow in a confined aquifer takes the form</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq10352346672845617722.png" alt="$$ \displaystyle S\frac{\partial h}{\partial t}=-\frac{\partial Q}{\partial x} $$"></span><script type="math/tex"> \displaystyle S\frac{\partial h}{\partial t}=-\frac{\partial Q}{\partial x} </script></p><p>where <span class="MathJax_Preview"><img src="MATLABsession6_eq05206992062289802237.png" alt="$S$"></span><script type="math/tex">S</script> [-] is the aquifer storativity (which relates to the bulk compressibility of the aquifer), <span class="MathJax_Preview"><img src="MATLABsession6_eq16410644637423230129.png" alt="$h$"></span><script type="math/tex">h</script> [L] is the hydraulic head, <span class="MathJax_Preview"><img src="MATLABsession6_eq10146963226942718528.png" alt="$t$"></span><script type="math/tex">t</script> [T] is time, <span class="MathJax_Preview"><img src="MATLABsession6_eq16247206711595679522.png" alt="$x$"></span><script type="math/tex">x</script> [L] is distance and <span class="MathJax_Preview"><img src="MATLABsession6_eq11775016853607289309.png" alt="$Q$"></span><script type="math/tex">Q</script> <span class="MathJax_Preview"><img src="MATLABsession6_eq07385316279226170445.png" alt="$[\mathrm{L}^2\mathrm{T}^{-1}]$"></span><script type="math/tex">[\mathrm{L}^2\mathrm{T}^{-1}]</script> is the volumetric flow rate per unit breadth of confined aquifer, found from</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq06274161437673324601.png" alt="$$ \displaystyle Q=-T\frac{\partial h}{\partial x} $$"></span><script type="math/tex"> \displaystyle Q=-T\frac{\partial h}{\partial x} </script></p><p>where <span class="MathJax_Preview"><img src="MATLABsession6_eq02773292069783016909.png" alt="$T$"></span><script type="math/tex">T</script> <span class="MathJax_Preview"><img src="MATLABsession6_eq07385316279226170445.png" alt="$[\mathrm{L}^2\mathrm{T}^{-1}]$"></span><script type="math/tex">[\mathrm{L}^2\mathrm{T}^{-1}]</script> is the transimssivity of the aquifer (which relates to the bulk permeability of the aquifer).</p><p>The relevant initial and boundary conditions can be written as follows:</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq11925581206301062232.png" alt="$$ \begin{array}{lll}&#xA;h=h_I, &amp; 0\leq x \leq L, &amp; t=0\\&#xA;h=h_0, &amp; x=0, &amp; t&gt;0\\&#xA;Q=0, &amp; x=L, &amp; t&gt;0\\&#xA;\end{array} $$"></span><script type="math/tex"> \begin{array}{lll}
+h=h_I, & 0\leq x \leq L, & t=0\\
+h=h_0, & x=0, & t>0\\
+Q=0, & x=L, & t>0\\
+\end{array} </script></p><p>where in this case, <span class="MathJax_Preview"><img src="MATLABsession6_eq02957759093502835678.png" alt="$h_I=50$"></span><script type="math/tex">h_I=50</script> m, <span class="MathJax_Preview"><img src="MATLABsession6_eq00601373647787106768.png" alt="$h_0=53$"></span><script type="math/tex">h_0=53</script> m and <span class="MathJax_Preview"><img src="MATLABsession6_eq12077417857718685072.png" alt="$L=1600$"></span><script type="math/tex">L=1600</script> m.</p><p>Use <tt>ode45</tt> to develop a one-dimensional finite difference model to estimate the hydraulic head within the aquifer.</p><p>Show your results as a plot of hydraulic head against distance, <span class="MathJax_Preview"><img src="MATLABsession6_eq16247206711595679522.png" alt="$x$"></span><script type="math/tex">x</script>, for the following times: 0.1, 0.3, 0.5, 1, 3, 5 and 7 days.</p><h2>Spatial discretisation using finite differences<a name="3"></a></h2><p>The above problem is an example of a partial differential equation (PDE). However, if we discretise the problem in space, the problem becomes a coupled set of ordinary differential equations (ODE) with respect to time. In the previous exercise we used <tt>ode45</tt> to solve a single ODE. Here we will use <tt>ode45</tt> to solve the large set of coupled ODEs that results from the spatial discretisation. We will use finite difference for spatial discretisation. However, other methods such as finite elements and pseudospectral methods can also be used in a similar way.</p><p>Let us consider a set of <span class="MathJax_Preview"><img src="MATLABsession6_eq05705075896852816573.png" alt="$N$"></span><script type="math/tex">N</script> discrete points on the <span class="MathJax_Preview"><img src="MATLABsession6_eq16247206711595679522.png" alt="$x$"></span><script type="math/tex">x</script>-axis: <span class="MathJax_Preview"><img src="MATLABsession6_eq02454124767383091943.png" alt="$x_1,x_2,x_3,\ldots,x_{N-1}, x_N$"></span><script type="math/tex">x_1,x_2,x_3,\ldots,x_{N-1}, x_N</script>.</p><p>The corresponding set of hydraulic heads can be written as: <span class="MathJax_Preview"><img src="MATLABsession6_eq01715105886694819057.png" alt="$h_1,h_2,h_3,\ldots,h_{N-1}, h_N$"></span><script type="math/tex">h_1,h_2,h_3,\ldots,h_{N-1}, h_N</script>.</p><p>An approximation of flow per unit breadth, <span class="MathJax_Preview"><img src="MATLABsession6_eq11775016853607289309.png" alt="$Q$"></span><script type="math/tex">Q</script>, can be found from</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq07519040846248773615.png" alt="$$\displaystyle Q_{i+1/2}=-T\left(\frac{h_{i+1}-h_i}{x_{i+1}-x_i}\right) $$"></span><script type="math/tex">\displaystyle Q_{i+1/2}=-T\left(\frac{h_{i+1}-h_i}{x_{i+1}-x_i}\right) </script></p><p>but note that these flow rates are defined at an alternative set of points:  <span class="MathJax_Preview"><img src="MATLABsession6_eq11447086956712172812.png" alt="$x_{1/2},x_{1+1/2},x_{2+1/2},\ldots,x_{N-1/2}, x_{N+1/2}$"></span><script type="math/tex">x_{1/2},x_{1+1/2},x_{2+1/2},\ldots,x_{N-1/2}, x_{N+1/2}</script>. This was discussed to some extent in "NNESMO: Session 4 - Approximate methods for differentiation and integration".</p><p>The resulting set of ODEs to be solved takes the form</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq13574330242377896831.png" alt="$$ \displaystyle \left.\frac{dh}{dt}\right|_{i}=-\frac{1}{S}\left(&#xA;\frac{Q_{i+1/2}-Q_{i-1/2}}{x_{i+1/2}-x_{i-1/2}}\right) $$"></span><script type="math/tex"> \displaystyle \left.\frac{dh}{dt}\right|_{i}=-\frac{1}{S}\left(
+\frac{Q_{i+1/2}-Q_{i-1/2}}{x_{i+1/2}-x_{i-1/2}}\right) </script></p><p>Recall that the relationship between <span class="MathJax_Preview"><img src="MATLABsession6_eq04664165686375029084.png" alt="$x_{i+1/2}$"></span><script type="math/tex">x_{i+1/2}</script> and <span class="MathJax_Preview"><img src="MATLABsession6_eq05043059182872985900.png" alt="$x_i$"></span><script type="math/tex">x_i</script> is</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq18018493367017624981.png" alt="$$ x_{i+1/2}=(x_{i+1}+x_i)/2 $$"></span><script type="math/tex"> x_{i+1/2}=(x_{i+1}+x_i)/2 </script></p><p>Furthermore it can be shown that</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq15295600026664436607.png" alt="$$ x_{i}=(x_{i+1/2}+x_{i-1/2})/2 $$"></span><script type="math/tex"> x_{i}=(x_{i+1/2}+x_{i-1/2})/2 </script></p><h2>Development of the solution code<a name="4"></a></h2><p>Create a new script-file and type the following:</p><pre class="language-matlab"><span class="keyword">function</span> MATLABsession6_Assignment
+<span class="comment">%This file contains instructions requested by MATLAB Notes - Session 6</span>
+</pre><pre class="language-matlab"><span class="comment">%Compute instructions associated with the groundwater flow example</span>
+GroundwaterExample
+</pre><pre class="language-matlab"><span class="comment">%**************************************************************************</span>
+</pre><pre class="language-matlab"><span class="keyword">function</span> GroundwaterExample
+<span class="comment">%Solves the one-dimensional confined aquifer flow equation using a MATLAB</span>
+<span class="comment">%ODE solver</span>
+</pre><pre class="language-matlab"><span class="comment">%T (m^2/day) - Transmissivity</span>
+<span class="comment">%S (-) - Storativity</span>
+<span class="comment">%L (m) - Length of the aquifer</span>
+<span class="comment">%hI (m) - Initial hydraulic head</span>
+<span class="comment">%h0 (m) - Boundary head</span>
+<span class="comment">%x (m) - location of points being solved for</span>
+<span class="comment">%xB (m) - location of finite difference block boundaries</span>
+<span class="comment">%t (days) - time</span>
+</pre><pre class="language-matlab"><span class="comment">%Define model parameters</span>
+T=800;
+S=0.01;
+L=1600;
+hI=50;
+h0=53;
+</pre><p>So far all we have done is written some comments explaining what some of the subsequent variables are and defined the model parameter values.</p><p>The next step is to determine the locations on the x-axis where we are going to solve for.</p><p>In the above variable list we have <tt>x</tt> and <tt>xB</tt>. It is planned that <tt>x</tt> and <tt>xB</tt> will be  a vectors containing <span class="MathJax_Preview"><img src="MATLABsession6_eq02454124767383091943.png" alt="$x_1,x_2,x_3,\ldots,x_{N-1}, x_N$"></span><script type="math/tex">x_1,x_2,x_3,\ldots,x_{N-1}, x_N</script> and <span class="MathJax_Preview"><img src="MATLABsession6_eq11447086956712172812.png" alt="$x_{1/2},x_{1+1/2},x_{2+1/2},\ldots,x_{N-1/2}, x_{N+1/2}$"></span><script type="math/tex">x_{1/2},x_{1+1/2},x_{2+1/2},\ldots,x_{N-1/2}, x_{N+1/2}</script>, respectively.</p><p>Another point to note is that <tt>xB(1)=0</tt> and <tt>xB(N+1)=L</tt>.</p><p>Add the following code to provide a discretisation for 20 equally spaced solution points</p><pre class="language-matlab"><span class="comment">%Define spatial grid</span>
+N=20;
+xB=linspace(0,L,N+1)';
+x=(xB(1:N,1)+xB(2:N+1,1))/2;
+</pre><p>Next we will add some code to define the times of interest and a vector containing the initial values for <span class="MathJax_Preview"><img src="MATLABsession6_eq14447172859022245003.png" alt="$h_i$"></span><script type="math/tex">h_i</script>.</p><pre class="language-matlab"><span class="comment">%Define the times of interest</span>
+t=[0 0.1 1 10 100];
+</pre><pre class="language-matlab"><span class="comment">%Define intial condition vector for the ode solver</span>
+hI_vec=zeros(size(x))+hI;
+</pre><p>Now we will call <tt>ode45</tt> to provide our solution. Note that we also need to pass all the relevant input parameters to the ODE function, <tt>MYodefun</tt>.</p><pre class="language-matlab"><span class="comment">%Apply ode45 to obtain the finite difference solution</span>
+options=[];
+[t,hFD]=ode45(@GroundwaterODEfun,t,hI_vec,options,x,xB,S,T,h0);
+</pre><p>Of course we need to write the ODE function as well. This can be added as a subfunction underneath the <tt>GroundwaterExample</tt> function.</p><pre class="language-matlab"><span class="keyword">function</span> dhdt=GroundwaterODEfun(t,h,x,xB,S,T,h0)
+<span class="comment">%Calculate derivatives and include h=h0 at x=0 boundary condition</span>
+dhdx=diff([h0;h],1,1)./diff([xB(1);x],1,1);
+<span class="comment">%Calculate Darcy fluxes and include Q=0 at x=L boundary condition</span>
+Q=[-T*dhdx;0];
+<span class="comment">%Calculate the flux divergence</span>
+dQdx=diff(Q,1,1)./diff(xB,1,1);
+<span class="comment">%Solve the mass conservation statement</span>
+dhdt=-dQdx/S;
+</pre><p>Most of the above code in the ODE function is self-explanatory. However, pay close attention to how the boundary conditions are applied.</p><p>The fixed head boundary, associated with the lake, is applied by concatenating the boundary head, <tt>h0</tt>, and its associated location, <tt>xB(1)</tt>, to the <tt>h</tt> and <tt>x</tt> vectors, respectively, prior to finding the derivatives, <span class="MathJax_Preview"><img src="MATLABsession6_eq03133738598635358593.png" alt="$dh/dx$"></span><script type="math/tex">dh/dx</script>.</p><p>The zero flux boundary, associated with the fault zone, is applied by simply concatenating a zero to the <tt>Q</tt> vector.</p><h2>Plotting the results and comparing to an analytical solution<a name="5"></a></h2><p>When ever developing numerical models it is always important to study your results and try to compare these to analytical solutions where possible.</p><p>The problem being solved here has an analytical solution for the special case where <span class="MathJax_Preview"><img src="MATLABsession6_eq17700851433997768094.png" alt="$L\rightarrow\infty$"></span><script type="math/tex">L\rightarrow\infty</script>. Our finite difference model should produce very similar results to the analytical solution until the pressure wave hits the bounday at <span class="MathJax_Preview"><img src="MATLABsession6_eq13147515631295286031.png" alt="$x=L$"></span><script type="math/tex">x=L</script>.</p><p>The analytical solution takes the form</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq07757403971468217149.png" alt="$$ \displaystyle h=(h_0-h_I)\mathrm{erfc}\left(\sqrt{\frac{Sx^2}{4Tt}}\right)+h_I $$"></span><script type="math/tex"> \displaystyle h=(h_0-h_I)\mathrm{erfc}\left(\sqrt{\frac{Sx^2}{4Tt}}\right)+h_I </script></p><p>Add the following subfunction to your script-file, which contains an implementation of the analytical solution.</p><pre class="language-matlab"><span class="keyword">function</span> h=GroundwaterAnalyticalSol(t,x,S,T,hI,h0)
+[t,x]=ndgrid(t,x);
+h=(h0-hI)*erfc(sqrt(S*x.^2/4/T./t))+hI;
+</pre><p>Add the following code to the <tt>GroundwaterExample</tt> function in your script-file to evaluate the analytical solution and generate a plot comparing the results from both the analytical and finite difference solutions.</p><pre class="language-matlab"><span class="comment">%Evaluate analytical solution</span>
+h=GroundwaterAnalyticalSol(t,x,S,T,hI,h0);
+</pre><pre class="language-matlab"><span class="comment">%Plot results and compare with the analytical solution</span>
+figure(1)
+clf
+hold <span class="string">on</span>
+plot(x,h)
+<span class="comment">%Reset colour order for plotting</span>
+set(gca,<span class="string">'ColorOrderIndex'</span>,1)
+plot(x,hFD,<span class="string">'o--'</span>)
+xlabel(<span class="string">'Distance (m)'</span>)
+ylabel(<span class="string">'Hydraulic head (m)'</span>)
+legend(<span class="string">'0 days (analytical)'</span>,<span class="string">'0.1 days (analytical)'</span>,<span class="keyword">...</span>
+    <span class="string">'1 days (analytical)'</span>,<span class="string">'10 days (analytical)'</span>,<span class="string">'100 days (analytical)'</span><span class="keyword">...</span>
+    ,<span class="string">'0 days (finite difference)'</span>,<span class="string">'0.1 days (finite difference)'</span><span class="keyword">...</span>
+    ,<span class="string">'1 days (finite difference)'</span>,<span class="string">'10 days (finite difference)'</span><span class="keyword">...</span>
+    ,<span class="string">'100 days (finite difference)'</span>)
+<span class="comment">%Make a nice box around the graphs</span>
+box <span class="string">on</span>
+</pre><h2>Stiff and non-stiff problems<a name="6"></a></h2><p>At the moment, we are solving the diffusion problem using a uniform space-step. Just as we can benefit from having time-step refinement during periods of high activity, we can also benefit from spatial grid refinement in areas of high activity.</p><p>In this particular case, most of the activity is occuring around <span class="MathJax_Preview"><img src="MATLABsession6_eq04399950071080211931.png" alt="$x=0$"></span><script type="math/tex">x=0</script> where the fixed head boundary exists. Therefore a more appropriate spatial discretisation is arguably achieved using the code:</p><pre class="language-matlab">xB=[0;logspace(-3,0,N)'*L];
+</pre><p>which logarithmically spaces the finite different points over three orders of magnitude, with the smallest grid spacing around <span class="MathJax_Preview"><img src="MATLABsession6_eq04399950071080211931.png" alt="$x=0$"></span><script type="math/tex">x=0</script>. Look up <tt>logspace</tt> in the help file to find out more.</p><p>Add the above code for <tt>xB</tt> to the existing code and run.</p><p>You will find the solution takes forever to complete. The reason is that the simulation has become very stiff. Type "ctrl c" in the command window to terminate the simulation.</p><p>Sets of coupled ODEs are said to be stiff when the ODEs move at very different rates. By refining the spatial grid, we have created a system whereby the ODEs near <span class="MathJax_Preview"><img src="MATLABsession6_eq04399950071080211931.png" alt="$x=0$"></span><script type="math/tex">x=0</script> are very fast whilst the ODEs near <span class="MathJax_Preview"><img src="MATLABsession6_eq13147515631295286031.png" alt="$x=L$"></span><script type="math/tex">x=L</script> are very slow.</p><p>The <tt>ode45</tt> solver is not good for stiff problems. Instead, try and use the solver <tt>ode15s</tt> by changing the code to say</p><pre class="language-matlab">[t,hFD]=ode15s(@GroundwaterODEfun,t,hI_vec,options,x,xB,S,T,h0);
+</pre><p>You can read more about how <tt>ode15s</tt> works in the help files.</p><h2>Specifying the Jacobian pattern<a name="7"></a></h2><p>For large sets of ODEs, the stiff solvers are much more efficient if you specify the Jacobian pattern a priori. So what is the Jacobian pattern?</p><p>For the example under consideration, let us define</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq01795626136649707675.png" alt="$$ \displaystyle f_i=\left. \frac{\partial h}{\partial t}\right|_{i} $$"></span><script type="math/tex"> \displaystyle f_i=\left. \frac{\partial h}{\partial t}\right|_{i} </script></p><p>Now consider the vectors <span class="MathJax_Preview"><img src="MATLABsession6_eq17868458529155543107.png" alt="$\mathbf{f}=[f_1,f_2,f_3,\ldots,f_{N-1},f_{N}]^T$"></span><script type="math/tex">\mathbf{f}=[f_1,f_2,f_3,\ldots,f_{N-1},f_{N}]^T</script> and <span class="MathJax_Preview"><img src="MATLABsession6_eq09595369435630932143.png" alt="$\mathbf{h}=[h_1,h_2,h_3,\ldots,h_{N-1},h_{N}]^T$"></span><script type="math/tex">\mathbf{h}=[h_1,h_2,h_3,\ldots,h_{N-1},h_{N}]^T</script>.</p><p>There is a matrix, <span class="MathJax_Preview"><img src="MATLABsession6_eq04385511706266856793.png" alt="$\mathbf J$"></span><script type="math/tex">\mathbf J</script>, that exists such that</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq02467812870416840535.png" alt="$$ \mathbf{f}=\mathbf{J} \mathbf{h} $$"></span><script type="math/tex"> \mathbf{f}=\mathbf{J} \mathbf{h} </script></p><p>After some further consideration, it can be understood that this matrix is defined as follows:</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq02263548751826482001.png" alt="$$ \displaystyle \mathbf{J}=\frac{d\mathbf{f}}{d\mathbf{h}}=\left[&#xA;\begin{array}{ccc}\displaystyle&#xA;\frac{\partial f_1}{\partial h_1} &amp; \ldots &amp; \displaystyle\frac{\partial f_1}{\partial h_N}\\&#xA;\vdots &amp; \ddots &amp; \vdots\\&#xA;\displaystyle\frac{\partial f_N}{\partial h_1} &amp; \ldots &amp; \displaystyle\frac{\partial f_N}{\partial h_N}\\&#xA;\end{array}&#xA;\right] $$"></span><script type="math/tex"> \displaystyle \mathbf{J}=\frac{d\mathbf{f}}{d\mathbf{h}}=\left[
+\begin{array}{ccc}\displaystyle
+\frac{\partial f_1}{\partial h_1} & \ldots & \displaystyle\frac{\partial f_1}{\partial h_N}\\
+\vdots & \ddots & \vdots\\
+\displaystyle\frac{\partial f_N}{\partial h_1} & \ldots & \displaystyle\frac{\partial f_N}{\partial h_N}\\
+\end{array}
+\right] </script></p><p>The <span class="MathJax_Preview"><img src="MATLABsession6_eq04385511706266856793.png" alt="$\mathbf J$"></span><script type="math/tex">\mathbf J</script> matrix quantatively described how each of the <span class="MathJax_Preview"><img src="MATLABsession6_eq03409040912975572587.png" alt="$f_i$"></span><script type="math/tex">f_i</script> values depend on each of the <span class="MathJax_Preview"><img src="MATLABsession6_eq14447172859022245003.png" alt="$h_i$"></span><script type="math/tex">h_i</script> values. Such a type of matrix is often called a Jacobian matrix.</p><p>By default, the stiff solvers in MATLAB calculate the Jacobian matrix using a set of finite difference calculations. For a set of <span class="MathJax_Preview"><img src="MATLABsession6_eq05705075896852816573.png" alt="$N$"></span><script type="math/tex">N</script> ODEs, the Jacobian matrix will have <span class="MathJax_Preview"><img src="MATLABsession6_eq15135318097484569549.png" alt="$N^2$"></span><script type="math/tex">N^2</script> elements. Therefore, it can be understood that such an approach can become computationally very expensive. However, in practice, the Jacobian matrix is very sparse. Consequently far fewer calculations are necessary. Therefore, there are great benefits to be had from informing MATLAB where the location of non-zero values are. This can be done by specifying the so-called Jacobian pattern.</p><p>Consider again the finite difference approximations for <span class="MathJax_Preview"><img src="MATLABsession6_eq11775016853607289309.png" alt="$Q$"></span><script type="math/tex">Q</script> and <span class="MathJax_Preview"><img src="MATLABsession6_eq01577562525108879386.png" alt="$\partial h/\partial t$"></span><script type="math/tex">\partial h/\partial t</script> above. Substituting the equation for <span class="MathJax_Preview"><img src="MATLABsession6_eq09447896733251525141.png" alt="$Q_{i+1/2}$"></span><script type="math/tex">Q_{i+1/2}</script> into the equation for <span class="MathJax_Preview"><img src="MATLABsession6_eq18323617010707842334.png" alt="$dh/dt|_{i}$"></span><script type="math/tex">dh/dt|_{i}</script> leads to</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq10162185481097394524.png" alt="$$\displaystyle \left.\frac{dh}{dt}\right|_{i}=a_i h_{i-1}+b_ih_i+c_ih_{i+1} $$"></span><script type="math/tex">\displaystyle \left.\frac{dh}{dt}\right|_{i}=a_i h_{i-1}+b_ih_i+c_ih_{i+1} </script></p><p>where</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq14045137384910521722.png" alt="$$ \displaystyle a_i = \frac{T}{S(x_{i}-x_{i-1})(x_{i+1/2}-x_{i-1/2})} $$"></span><script type="math/tex"> \displaystyle a_i = \frac{T}{S(x_{i}-x_{i-1})(x_{i+1/2}-x_{i-1/2})} </script></p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq05705769795218069288.png" alt="$$\displaystyle c_i = \frac{T}{S(x_{i+1}-x_i)(x_{i+1/2}-x_{i-1/2})} $$"></span><script type="math/tex">\displaystyle c_i = \frac{T}{S(x_{i+1}-x_i)(x_{i+1/2}-x_{i-1/2})} </script></p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq08961768521202844181.png" alt="$$\displaystyle b_i = -(a_i + c_i) $$"></span><script type="math/tex">\displaystyle b_i = -(a_i + c_i) </script></p><p>Therefore, the Jacobian pattern for this problem can be seen to be a tri-diagonal sparse matrix of the form:</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq06947910690342886526.png" alt="$$ \left[&#xA;\begin{array}{ccccccccc}&#xA;1 &amp; 1 &amp; 0 &amp; 0 &amp; \ldots &amp; 0 &amp; 0 &amp; 0 &amp; 0\\&#xA;1 &amp; 1 &amp; 1 &amp; 0 &amp; \ldots &amp; 0 &amp; 0 &amp; 0 &amp; 0\\&#xA;0 &amp; 1 &amp; 1 &amp; 1 &amp; \ldots &amp; 0 &amp; 0 &amp; 0 &amp; 0\\&#xA;0 &amp; 0 &amp; 1 &amp; 1 &amp; \ldots &amp; 0 &amp; 0 &amp; 0 &amp; 0\\&#xA;\vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots\\&#xA;0 &amp; 0 &amp; 0 &amp; 0 &amp; \ldots &amp; 1 &amp; 1 &amp; 0 &amp; 0\\&#xA;0 &amp; 0 &amp; 0 &amp; 0 &amp; \ldots &amp; 1 &amp; 1 &amp; 1 &amp; 0\\&#xA;0 &amp; 0 &amp; 0 &amp; 0 &amp; \ldots &amp; 0 &amp; 1 &amp; 1 &amp; 1\\&#xA;0 &amp; 0 &amp; 0 &amp; 0 &amp; \ldots &amp; 0 &amp; 0 &amp; 1 &amp; 1\\&#xA;\end{array}&#xA;\right] $$"></span><script type="math/tex"> \left[
+\begin{array}{ccccccccc}
+1 & 1 & 0 & 0 & \ldots & 0 & 0 & 0 & 0\\
+1 & 1 & 1 & 0 & \ldots & 0 & 0 & 0 & 0\\
+0 & 1 & 1 & 1 & \ldots & 0 & 0 & 0 & 0\\
+0 & 0 & 1 & 1 & \ldots & 0 & 0 & 0 & 0\\
+\vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \vdots\\
+0 & 0 & 0 & 0 & \ldots & 1 & 1 & 0 & 0\\
+0 & 0 & 0 & 0 & \ldots & 1 & 1 & 1 & 0\\
+0 & 0 & 0 & 0 & \ldots & 0 & 1 & 1 & 1\\
+0 & 0 & 0 & 0 & \ldots & 0 & 0 & 1 & 1\\
+\end{array}
+\right] </script></p><p>To implement this Jacobian pattern within your code, replace the line</p><pre class="language-matlab">options=[];
+</pre><p>with</p><pre class="language-matlab"><span class="comment">%Define and set the Jacobian pattern</span>
+JPat=spdiags(ones(N,3),[-1 0 1],N,N);
+options=odeset(<span class="string">'JPattern'</span>,JPat);
+</pre><p>Run your programme again. It should be a little faster. Specifying the Jacobian pattern will much more important when we look at a two-dimensional problem in a later session.</p><p>To understand further how, the Jacobian pattern has been specified, read the help files for <tt>odeset</tt> and then for <tt>spdiags</tt>.</p><p>The <tt>spdiags</tt> command enables us to construct a tri-diagonal sparse matrix. The <tt>ones(N,3)</tt> tells us there will be three diagonals containing ones. The <tt>[-1 0 1]</tt> presribes the column number at which the diagonals will start in the top row of our sparse matrix. The <tt>N,N</tt> tells us that the resulting sparse matrix will be of size, <span class="MathJax_Preview"><img src="MATLABsession6_eq09723160877142774591.png" alt="$N\times N$"></span><script type="math/tex">N\times N</script>.</p><h2>Classroom assignment<a name="8"></a></h2><p>An incident at a paper factory has led to the dumping of product in a nearby river. Creat a new subfunction called <tt>ChemicalTransportExample</tt> and use the advection dispersion equation to simulate the subsequent migration of contamination.</p><p>The relevant governing equation is:</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq12644189647580676092.png" alt="$$ \displaystyle \frac{\partial C}{\partial t}=-\frac{\partial q}{\partial x}$$"></span><script type="math/tex"> \displaystyle \frac{\partial C}{\partial t}=-\frac{\partial q}{\partial x}</script></p><p>where</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq18185287718607648769.png" alt="$$ \displaystyle q=vC-D_L\frac{\partial C}{\partial x} $$"></span><script type="math/tex"> \displaystyle q=vC-D_L\frac{\partial C}{\partial x} </script></p><p>and <span class="MathJax_Preview"><img src="MATLABsession6_eq08596374860807106346.png" alt="$C$"></span><script type="math/tex">C</script> <span class="MathJax_Preview"><img src="MATLABsession6_eq03717337757153475401.png" alt="$[\mathrm{ML}^{-3}]$"></span><script type="math/tex">[\mathrm{ML}^{-3}]</script> is the solute concentration of the product, <span class="MathJax_Preview"><img src="MATLABsession6_eq10146963226942718528.png" alt="$t$"></span><script type="math/tex">t</script> <span class="MathJax_Preview"><img src="MATLABsession6_eq16979207896498719141.png" alt="$[\mathrm{T}]$"></span><script type="math/tex">[\mathrm{T}]</script> is time, <span class="MathJax_Preview"><img src="MATLABsession6_eq16247206711595679522.png" alt="$x$"></span><script type="math/tex">x</script> [L] is space and <span class="MathJax_Preview"><img src="MATLABsession6_eq08858538926401347449.png" alt="$D_L$"></span><script type="math/tex">D_L</script> <span class="MathJax_Preview"><img src="MATLABsession6_eq07385316279226170445.png" alt="$[\mathrm{L}^2\mathrm{T}^{-1}]$"></span><script type="math/tex">[\mathrm{L}^2\mathrm{T}^{-1}]</script> is the longitudinal dispersion coefficent.</p><p>The relevant initial and boundary conditions can be written as follows:</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq11096832240673870115.png" alt="$$ \begin{array}{lll}&#xA;C=C_I, &amp; 0\leq x \leq L, &amp; t=0\\&#xA;C=C_0(t), &amp; x=0, &amp; t&gt;0\\&#xA;\displaystyle \partial C/\partial x=0, &amp; x=L, &amp; t&gt;0\\&#xA;\end{array} $$"></span><script type="math/tex"> \begin{array}{lll}
+C=C_I, & 0\leq x \leq L, & t=0\\
+C=C_0(t), & x=0, & t>0\\
+\displaystyle \partial C/\partial x=0, & x=L, & t>0\\
+\end{array} </script></p><p>where in this case, <span class="MathJax_Preview"><img src="MATLABsession6_eq05107821772737625547.png" alt="$L=10$"></span><script type="math/tex">L=10</script> km, <span class="MathJax_Preview"><img src="MATLABsession6_eq09008463250846382248.png" alt="$C_I=0.1$"></span><script type="math/tex">C_I=0.1</script> mg/l and</p><p><span class="MathJax_Preview"><img src="MATLABsession6_eq03053315589217955612.png" alt="$$\displaystyle C_0(t)=\left\{\begin{array}{ll}&#xA;C_{00}, &amp; 0\leq t\leq t_{0}\\&#xA;\\&#xA;C_I, &amp; t&gt;t_{0}&#xA;\end{array}\right.$$"></span><script type="math/tex">\displaystyle C_0(t)=\left\{\begin{array}{ll}
+C_{00}, & 0\leq t\leq t_{0}\\
+\\
+C_I, & t>t_{0}
+\end{array}\right.</script></p><p>where <span class="MathJax_Preview"><img src="MATLABsession6_eq06282554919050128111.png" alt="$C_{00}=120$"></span><script type="math/tex">C_{00}=120</script> mg/l and <span class="MathJax_Preview"><img src="MATLABsession6_eq16017453208346745312.png" alt="$t_{0}=1$"></span><script type="math/tex">t_{0}=1</script> day.</p><p>The velocity in the river is 1.2 km/day and the associated longitudinal dispersion coefficient is 0.23 <span class="MathJax_Preview"><img src="MATLABsession6_eq17276298754622122256.png" alt="$\mathrm{km}^2/\mathrm{day}$"></span><script type="math/tex">\mathrm{km}^2/\mathrm{day}</script>.</p><p>Discretise your domain such that you have 50 equally-spaced solution points. Then write some code to solve the above problem using <tt>ode15s</tt>.</p><p>Note that something interesting has to be done to obtain an appropiate vector of concentration values, which can be multplied by <span class="MathJax_Preview"><img src="MATLABsession6_eq10084146807967347884.png" alt="$v$"></span><script type="math/tex">v</script> in the expression for <span class="MathJax_Preview"><img src="MATLABsession6_eq08880433698436706605.png" alt="$q$"></span><script type="math/tex">q</script> above. Let us call this vector of concentration values <tt>CB</tt> (i.e., concentrations at the block boundaries). I suggest you adopt the following approach:</p><pre class="language-matlab"><span class="comment">%Interpolate C to the xB points</span>
+CB=interp1(x,C,xB);
+<span class="comment">%Impose fixed concentration boundary</span>
+CB(1)=C0;
+<span class="comment">%Impose zero gradient boundary</span>
+CB(end)=C(end);
+</pre><p>Such an approach essentially represents a central differencing scheme. Read the help files about <tt>interp1</tt> if you have not seen this before. This is a very useful function.</p><p>Paste the following subfunctions at the end of your code. These contain an analytical solution to the above problem:</p><pre class="language-matlab"><span class="keyword">function</span> C=ChemicalTransportAnalyticalSol(t,x,v,DL,CI,C00,t0)
+<span class="comment">%Analytical solution for the advection dispersion problem</span>
+<span class="comment">%t (days) - time after start of spill</span>
+<span class="comment">%x (km) - distance from spill</span>
+<span class="comment">%v (km/day) - velocity of river flow</span>
+<span class="comment">%DL (km^2/day) - longitudinal dispersion coefficient</span>
+<span class="comment">%CI (mg/l) - initial concenctration</span>
+<span class="comment">%C00 (mg/l) - concentration at spill site during spill incident</span>
+<span class="comment">%t0 (days) - duration of spill incident</span>
+[t,x]=ndgrid(t,x);
+F1=FFun(t*v./x,v*x/DL);
+F2=FFun((t-t0)*v./x,v*x/DL);
+F2(t&lt;t0)=0;
+F=F1-F2;
+C=(C00-CI)*F+CI;
+</pre><pre class="language-matlab"><span class="comment">%**************************************************************************</span>
+<span class="keyword">function</span> F=FFun(z,P)
+z(z&lt;0)=0;
+F=(erfc(sqrt(P/4./z).*(1-z))+exp(P).*erfc(sqrt(P/4./z).*(1+z)))/2;
+ind=P&gt;700;
+F(ind)=erfc(sqrt(P(ind)/4./z(ind)).*(1-z(ind)))/2;
+</pre><p>Generate a plot of solute concentration against distance for 0, 2, 4 and 6 days. Compare the results from your finite difference code with those from the analytical solution.</p><p>You should find there is almost a perfect correspondence between the finite difference code and the analytical solution. Now reduce the dispersion coefficient by a factor of 20. What happens and why?</p><p>An example MATLAB code, containing all of the instructions requested above, is given in <a href="https://samathiasuk.github.io/MATLABnotes/MATLABsession6_Assignment.m">MATLABsession6_Assignment.m</a>.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% MATLAB Notes: Session 6 - Solving PDEs using ODE solvers
+%
+% Simon Mathias
+%
+% Department of Engineering
+%
+% Durham University
+%
+% <https://samathiasuk.github.io/MATLABnotes/html/MATLABcontents.html Return to main contents page>
+%
+%% Learning outcomes
+%
+% At the end of the session you should be able to:
+%
+% * Use a finite difference spatial discretisation to transform a partial
+% differential equation (PDE) into a set of coupled ordinary differential equations (ODE).
+% * Solve the one-dimensional advection dispersion equation using |ode45| or |ode15s|.
+% * Apply a non-uniform grid spacing.
+% * Understand the meaning of stiff and non-stiff problems.
+% * Determine the Jacobian pattern associated with a PDE problem.
+% * Solve PDEs using |ode15s|.
+%
+%% Groundwater flow in a confined aquifer
+%
+% A confined aquifer is bounded to the West by a lake and to the East by an 
+% impermeable fault zone. The aquifer is homogenous and isotropic and 
+% characterised by a transmissivity of 800 $\mathrm{m}^{2}\mathrm{day}^{-1}$
+% and a storativity of 0.01. The edge of the lake lies parallel to the 
+% fault zone and is separated by a distance of 1600 m. Initially the lake 
+% level is 50  mAOD (metres above ordinance datum). After a significant episode of snow melt in the 
+% mountains above, the water level in the lake is suddenly raised to 53
+% mAOD.
+% 
+% The governing equation for one dimensional groundwater flow in a confined
+% aquifer takes the form
+%
+% $$ \displaystyle S\frac{\partial h}{\partial t}=-\frac{\partial Q}{\partial x} $$
+% 
+% where $S$ [-] is the aquifer storativity (which relates to the bulk
+% compressibility of the aquifer), $h$ [L] is the hydraulic head, $t$ [T]
+% is time, $x$ [L] is distance and $Q$ $[\mathrm{L}^2\mathrm{T}^{-1}]$
+% is the volumetric flow rate per unit breadth of confined aquifer, found
+% from
+%
+% $$ \displaystyle Q=-T\frac{\partial h}{\partial x} $$
+%
+% where $T$ $[\mathrm{L}^2\mathrm{T}^{-1}]$ is the transimssivity of
+% the aquifer (which relates to the bulk permeability of the aquifer).
+%
+% The relevant initial and boundary conditions can be written as follows:
+%
+% $$ \begin{array}{lll}
+% h=h_I, & 0\leq x \leq L, & t=0\\
+% h=h_0, & x=0, & t>0\\
+% Q=0, & x=L, & t>0\\
+% \end{array} $$
+%
+% where in this case, $h_I=50$ m, $h_0=53$ m and $L=1600$ m.
+%
+% Use |ode45| to develop a one-dimensional finite difference model to estimate 
+% the hydraulic head within the aquifer.
+% 
+% Show your results as a plot of hydraulic head against distance, $x$, for 
+% the following times: 0.1, 0.3, 0.5, 1, 3, 5 and 7 days.
+%
+%% Spatial discretisation using finite differences
+%
+% The above problem is an example of a partial differential equation (PDE).
+% However, if we discretise the problem in space, the problem becomes a
+% coupled set of ordinary differential equations (ODE) with respect to
+% time. In the previous exercise we used |ode45| to solve a single ODE.
+% Here we will use |ode45| to solve the large set of coupled ODEs that
+% results from the spatial discretisation. We will use finite difference 
+% for spatial discretisation. However, other methods such as finite
+% elements and pseudospectral methods can also be used in a similar way.
+%
+% Let us consider a set of $N$ discrete points on the $x$-axis:
+% $x_1,x_2,x_3,\ldots,x_{N-1}, x_N$.
+%
+% The corresponding set of hydraulic heads can be written as: $h_1,h_2,h_3,\ldots,h_{N-1}, h_N$.
+%
+% An approximation of flow per unit breadth, $Q$, can be found from
+%
+% $$\displaystyle Q_{i+1/2}=-T\left(\frac{h_{i+1}-h_i}{x_{i+1}-x_i}\right) $$
+%
+% but note that these flow rates are defined at an alternative set of
+% points:  $x_{1/2},x_{1+1/2},x_{2+1/2},\ldots,x_{N-1/2}, x_{N+1/2}$. This
+% was discussed to some extent in "NNESMO: Session 4 -
+% Approximate methods for differentiation and integration".
+%
+% The resulting set of ODEs to be solved takes the form
+%
+% $$ \displaystyle \left.\frac{dh}{dt}\right|_{i}=-\frac{1}{S}\left(
+% \frac{Q_{i+1/2}-Q_{i-1/2}}{x_{i+1/2}-x_{i-1/2}}\right) $$
+%
+% Recall that the relationship between $x_{i+1/2}$ and $x_i$ is
+%
+% $$ x_{i+1/2}=(x_{i+1}+x_i)/2 $$
+%
+% Furthermore it can be shown that
+%
+% $$ x_{i}=(x_{i+1/2}+x_{i-1/2})/2 $$
+%
+%% Development of the solution code
+%
+% Create a new script-file and type the following:
+%
+%   function MATLABsession6_Assignment
+%   %This file contains instructions requested by MATLAB Notes - Session 6
+%
+%   %Compute instructions associated with the groundwater flow example
+%   GroundwaterExample
+%
+%   %**************************************************************************
+%
+%   function GroundwaterExample
+%   %Solves the one-dimensional confined aquifer flow equation using a MATLAB
+%   %ODE solver
+%
+%   %T (m^2/day) - Transmissivity
+%   %S (-) - Storativity
+%   %L (m) - Length of the aquifer
+%   %hI (m) - Initial hydraulic head
+%   %h0 (m) - Boundary head
+%   %x (m) - location of points being solved for
+%   %xB (m) - location of finite difference block boundaries
+%   %t (days) - time
+%   
+%   %Define model parameters
+%   T=800;
+%   S=0.01;
+%   L=1600;
+%   hI=50;
+%   h0=53;
+%
+% So far all we have done is written some comments explaining what some of
+% the subsequent variables are and defined the model parameter values.
+%
+% The next step is to determine the locations on the x-axis where we are
+% going to solve for.
+%
+% In the above variable list we have |x| and |xB|. It is planned that |x| 
+% and |xB| will be  a vectors containing 
+% $x_1,x_2,x_3,\ldots,x_{N-1}, x_N$ and 
+% $x_{1/2},x_{1+1/2},x_{2+1/2},\ldots,x_{N-1/2}, x_{N+1/2}$, respectively.
+%
+% Another point to note is that |xB(1)=0| and |xB(N+1)=L|.
+%
+% Add the following code to provide a discretisation for 20 equally spaced
+% solution points  
+%
+%   %Define spatial grid
+%   N=20;
+%   xB=linspace(0,L,N+1)';
+%   x=(xB(1:N,1)+xB(2:N+1,1))/2;
+%
+% Next we will add some code to define the times of interest and a vector
+% containing the initial values for $h_i$.
+%
+%   %Define the times of interest
+%   t=[0 0.1 1 10 100];
+%
+%   %Define intial condition vector for the ode solver
+%   hI_vec=zeros(size(x))+hI;
+%
+%
+% Now we will call |ode45| to provide our solution. Note that we also need
+% to pass all the relevant input parameters to the ODE function, |MYodefun|.
+%
+%   %Apply ode45 to obtain the finite difference solution
+%   options=[];
+%   [t,hFD]=ode45(@GroundwaterODEfun,t,hI_vec,options,x,xB,S,T,h0);
+%
+%
+% Of course we need to write the ODE function as well. This can be added as
+% a subfunction underneath the |GroundwaterExample| function.
+%
+%   function dhdt=GroundwaterODEfun(t,h,x,xB,S,T,h0)
+%   %Calculate derivatives and include h=h0 at x=0 boundary condition
+%   dhdx=diff([h0;h],1,1)./diff([xB(1);x],1,1);
+%   %Calculate Darcy fluxes and include Q=0 at x=L boundary condition
+%   Q=[-T*dhdx;0];
+%   %Calculate the flux divergence
+%   dQdx=diff(Q,1,1)./diff(xB,1,1);
+%   %Solve the mass conservation statement
+%   dhdt=-dQdx/S;
+%
+%
+% Most of the above code in the ODE function is self-explanatory. However, 
+% pay close attention
+% to how the boundary conditions are applied.
+%
+% The fixed head boundary, associated with the lake,
+% is applied by concatenating the boundary head, |h0|, and its associated
+% location, |xB(1)|, to the |h| and |x| vectors, respectively, prior to
+% finding the derivatives, $dh/dx$.
+%
+% The zero flux boundary, associated with the fault zone, is applied by
+% simply concatenating a zero to the |Q| vector.
+%
+%% Plotting the results and comparing to an analytical solution
+%
+% When ever developing numerical models it is always important to study your
+% results and try to compare these to analytical solutions where possible.
+%
+% The problem being solved here has an analytical solution for the special
+% case where $L\rightarrow\infty$. Our finite difference model should
+% produce very similar results to the analytical solution until the
+% pressure wave hits the bounday at $x=L$.
+%
+% The analytical solution takes the form
+%
+% $$ \displaystyle h=(h_0-h_I)\mathrm{erfc}\left(\sqrt{\frac{Sx^2}{4Tt}}\right)+h_I $$
+%
+% Add the following subfunction to your script-file, which contains an
+% implementation of the analytical solution.
+%
+%   function h=GroundwaterAnalyticalSol(t,x,S,T,hI,h0)
+%   [t,x]=ndgrid(t,x);
+%   h=(h0-hI)*erfc(sqrt(S*x.^2/4/T./t))+hI;
+%
+% Add the following code to the |GroundwaterExample| function in your script-file to
+% evaluate the analytical solution and generate a plot comparing the results 
+% from both the analytical and finite difference solutions.
+%
+%   %Evaluate analytical solution
+%   h=GroundwaterAnalyticalSol(t,x,S,T,hI,h0);
+%   
+%   %Plot results and compare with the analytical solution
+%   figure(1)
+%   clf
+%   hold on
+%   plot(x,h)
+%   %Reset colour order for plotting
+%   set(gca,'ColorOrderIndex',1)
+%   plot(x,hFD,'oREPLACE_WITH_DASH_DASH')
+%   xlabel('Distance (m)')
+%   ylabel('Hydraulic head (m)')
+%   legend('0 days (analytical)','0.1 days (analytical)',...
+%       '1 days (analytical)','10 days (analytical)','100 days (analytical)'...
+%       ,'0 days (finite difference)','0.1 days (finite difference)'...
+%       ,'1 days (finite difference)','10 days (finite difference)'...
+%       ,'100 days (finite difference)')
+%   %Make a nice box around the graphs
+%   box on
+%
+%% Stiff and non-stiff problems
+%
+% At the moment, we are solving the diffusion problem using a uniform
+% space-step. Just as we can benefit from having time-step refinement
+% during periods of high activity, we can also benefit from spatial grid
+% refinement in areas of high activity.
+%
+% In this particular case, most of the activity is occuring around $x=0$ where
+% the fixed head boundary exists. Therefore a more appropriate spatial
+% discretisation is arguably achieved using the code:
+%
+%   xB=[0;logspace(-3,0,N)'*L];
+%
+% which logarithmically spaces the finite different points over three
+% orders of magnitude, with the smallest grid spacing around $x=0$. Look up
+% |logspace| in the help file to find out more.
+%
+% Add the above code for |xB| to the existing code and run.
+%
+% You will find the solution takes forever to complete. The reason is that
+% the simulation has become very stiff. Type "ctrl c" in the command
+% window to terminate the simulation.
+%
+% Sets of coupled ODEs are said to be 
+% stiff when the ODEs move at very different rates. By refining the spatial
+% grid, we have created a system whereby the ODEs near $x=0$ are very fast
+% whilst the ODEs near $x=L$ are very slow.
+%
+% The |ode45| solver is not good for stiff problems. Instead, try and use
+% the solver |ode15s| by changing the code to say
+%
+%   [t,hFD]=ode15s(@GroundwaterODEfun,t,hI_vec,options,x,xB,S,T,h0);
+%
+% You can read more about how |ode15s| works in the help files.
+%
+%% Specifying the Jacobian pattern
+%
+% For large sets of ODEs, the stiff solvers are much more efficient if you
+% specify the Jacobian pattern a priori. So what is the Jacobian pattern?
+%
+% For the example under consideration, let us define
+%
+% $$ \displaystyle f_i=\left. \frac{\partial h}{\partial t}\right|_{i} $$
+%
+% Now consider the vectors $\mathbf{f}=[f_1,f_2,f_3,\ldots,f_{N-1},f_{N}]^T$ and
+% $\mathbf{h}=[h_1,h_2,h_3,\ldots,h_{N-1},h_{N}]^T$.
+%
+% There is a matrix, $\mathbf J$, that exists such that
+%
+% $$ \mathbf{f}=\mathbf{J} \mathbf{h} $$
+%
+% After some further consideration, it can be understood that this matrix
+% is defined as follows:
+%
+% $$ \displaystyle \mathbf{J}=\frac{d\mathbf{f}}{d\mathbf{h}}=\left[
+% \begin{array}{ccc}\displaystyle
+% \frac{\partial f_1}{\partial h_1} & \ldots & \displaystyle\frac{\partial f_1}{\partial h_N}\\
+% \vdots & \ddots & \vdots\\
+% \displaystyle\frac{\partial f_N}{\partial h_1} & \ldots & \displaystyle\frac{\partial f_N}{\partial h_N}\\
+% \end{array}
+% \right] $$
+%
+% The $\mathbf J$ matrix quantatively described how each of the $f_i$
+% values depend on each of the $h_i$ values. Such a type of matrix is often
+% called a Jacobian matrix.
+%
+% By default, the stiff solvers in MATLAB calculate the Jacobian matrix 
+% using a set of finite difference calculations. For a set of $N$ ODEs, the
+% Jacobian matrix will have $N^2$ elements. Therefore, it can be understood
+% that such an approach can become computationally very expensive. However,
+% in practice, the Jacobian matrix is very sparse. Consequently far fewer
+% calculations are necessary. Therefore, there are great benefits to be had
+% from informing MATLAB where the location of non-zero values are. This
+% can be done by specifying the so-called Jacobian pattern.
+%
+% Consider again the finite difference approximations for $Q$ and $\partial
+% h/\partial t$ above. Substituting the equation for $Q_{i+1/2}$ into the
+% equation for $dh/dt|_{i}$ leads to
+%
+% $$\displaystyle \left.\frac{dh}{dt}\right|_{i}=a_i h_{i-1}+b_ih_i+c_ih_{i+1} $$
+%
+% where
+%
+% $$ \displaystyle a_i = \frac{T}{S(x_{i}-x_{i-1})(x_{i+1/2}-x_{i-1/2})} $$
+%
+% $$\displaystyle c_i = \frac{T}{S(x_{i+1}-x_i)(x_{i+1/2}-x_{i-1/2})} $$
+%
+% $$\displaystyle b_i = -(a_i + c_i) $$
+%
+% Therefore, the Jacobian pattern for this problem can be seen to be a
+% tri-diagonal sparse matrix of the form:
+%
+% $$ \left[
+% \begin{array}{ccccccccc}
+% 1 & 1 & 0 & 0 & \ldots & 0 & 0 & 0 & 0\\ 
+% 1 & 1 & 1 & 0 & \ldots & 0 & 0 & 0 & 0\\ 
+% 0 & 1 & 1 & 1 & \ldots & 0 & 0 & 0 & 0\\ 
+% 0 & 0 & 1 & 1 & \ldots & 0 & 0 & 0 & 0\\ 
+% \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \vdots\\ 
+% 0 & 0 & 0 & 0 & \ldots & 1 & 1 & 0 & 0\\ 
+% 0 & 0 & 0 & 0 & \ldots & 1 & 1 & 1 & 0\\ 
+% 0 & 0 & 0 & 0 & \ldots & 0 & 1 & 1 & 1\\ 
+% 0 & 0 & 0 & 0 & \ldots & 0 & 0 & 1 & 1\\ 
+% \end{array}
+% \right] $$
+%
+% To implement this Jacobian pattern within your code, replace the line
+%
+%   options=[];
+%
+% with
+%
+%   %Define and set the Jacobian pattern
+%   JPat=spdiags(ones(N,3),[-1 0 1],N,N);
+%   options=odeset('JPattern',JPat);
+%
+% Run your programme again. It should be a little faster. Specifying the
+% Jacobian pattern will much more important when we look at 
+% a two-dimensional problem in a later session.
+%
+% To understand further how, the Jacobian pattern has been specified, read
+% the help files for |odeset| and then for |spdiags|.
+%
+% The |spdiags| command enables us to construct a tri-diagonal sparse
+% matrix. The |ones(N,3)| tells us there will be three diagonals containing
+% ones. The |[-1 0 1]| presribes the column number at which the diagonals
+% will start in the top row of our sparse matrix. The |N,N| tells us that
+% the resulting sparse matrix will be of size, $N\times N$.
+%
+%% Classroom assignment
+%
+% An incident at a paper factory has led to the dumping of product in a 
+% nearby river. Creat a new subfunction called |ChemicalTransportExample| and use the advection dispersion equation to simulate the 
+% subsequent migration of contamination.
+%
+% The relevant governing equation is:
+%
+% $$ \displaystyle \frac{\partial C}{\partial t}=-\frac{\partial q}{\partial x}$$
+%
+% where
+%
+% $$ \displaystyle q=vC-D_L\frac{\partial C}{\partial x} $$
+%
+% and $C$ $[\mathrm{ML}^{-3}]$ is the solute concentration of the
+% product, $t$ $[\mathrm{T}]$ is time, $x$ [L] is space and $D_L$
+% $[\mathrm{L}^2\mathrm{T}^{-1}]$ is the longitudinal dispersion coefficent.
+%
+% The relevant initial and boundary conditions can be written as follows:
+%
+% $$ \begin{array}{lll}
+% C=C_I, & 0\leq x \leq L, & t=0\\
+% C=C_0(t), & x=0, & t>0\\
+% \displaystyle \partial C/\partial x=0, & x=L, & t>0\\
+% \end{array} $$
+%
+% where in this case, $L=10$ km, $C_I=0.1$ mg/l and
+%
+% $$\displaystyle C_0(t)=\left\{\begin{array}{ll}
+% C_{00}, & 0\leq t\leq t_{0}\\
+% \\
+% C_I, & t>t_{0}
+% \end{array}\right.$$
+%
+% where $C_{00}=120$ mg/l and $t_{0}=1$ day.
+%
+% The velocity in the river is 1.2 km/day and the associated longitudinal
+% dispersion coefficient is 0.23 $\mathrm{km}^2/\mathrm{day}$.
+%
+% Discretise your domain such that you have 50 equally-spaced solution
+% points. Then write some code to solve the above problem using |ode15s|.
+%
+% Note that something interesting has to be done to obtain an appropiate
+% vector of concentration values, which can be multplied by $v$ in the
+% expression for $q$ above. Let us call this vector of concentration values
+% |CB| (i.e., concentrations at the block boundaries). I suggest you adopt
+% the following approach:
+%
+%   %Interpolate C to the xB points
+%   CB=interp1(x,C,xB);
+%   %Impose fixed concentration boundary
+%   CB(1)=C0;
+%   %Impose zero gradient boundary
+%   CB(end)=C(end);
+%
+% Such an approach essentially represents a central differencing scheme.
+% Read the help files about |interp1| if you have not seen this before.
+% This is a very useful function.
+%
+% Paste the following subfunctions at the end of your code. These contain
+% an analytical solution to the above problem:
+%
+%   function C=ChemicalTransportAnalyticalSol(t,x,v,DL,CI,C00,t0)
+%   %Analytical solution for the advection dispersion problem
+%   %t (days) - time after start of spill
+%   %x (km) - distance from spill
+%   %v (km/day) - velocity of river flow
+%   %DL (km^2/day) - longitudinal dispersion coefficient
+%   %CI (mg/l) - initial concenctration
+%   %C00 (mg/l) - concentration at spill site during spill incident
+%   %t0 (days) - duration of spill incident
+%   [t,x]=ndgrid(t,x);
+%   F1=FFun(t*v./x,v*x/DL);
+%   F2=FFun((t-t0)*v./x,v*x/DL);
+%   F2(t<t0)=0;
+%   F=F1-F2;
+%   C=(C00-CI)*F+CI;
+%
+%   %**************************************************************************
+%   function F=FFun(z,P)
+%   z(z<0)=0;
+%   F=(erfc(sqrt(P/4./z).*(1-z))+exp(P).*erfc(sqrt(P/4./z).*(1+z)))/2;
+%   ind=P>700;
+%   F(ind)=erfc(sqrt(P(ind)/4./z(ind)).*(1-z(ind)))/2;
+%
+% Generate a plot of solute concentration against distance for 0, 2, 4 and
+% 6 days. Compare the results from your finite difference code with those
+% from the analytical solution.
+%
+% You should find there is almost a perfect correspondence between the
+% finite difference code and the analytical solution. Now reduce the
+% dispersion coefficient by a factor of 20. What happens and why?
+%
+% An example MATLAB code, containing all of the instructions requested
+% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession6_Assignment.m MATLABsession6_Assignment.m>.
+ 
+
+##### SOURCE END #####
+--></body></html>

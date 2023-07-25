@@ -1,0 +1,556 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MATLAB Notes: Session 4 - Approximate methods for differentiation and integration</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-07-25"><meta name="DC.source" content="MATLABsession4.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>MATLAB Notes: Session 4 - Approximate methods for differentiation and integration</h1><!--introduction--><p>Simon Mathias</p><p>Department of Engineering</p><p>Durham University</p><p><a href="https://samathiasuk.github.io/MATLABnotes/html/MATLABcontents.html">Return to main contents page</a></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Learning outcomes</a></li><li><a href="#2">Finite differences</a></li><li><a href="#3">Approximating derivatives using finite differences</a></li><li><a href="#10">Approximating derivatives using the diff command</a></li><li><a href="#17">Trapezoidal rule and its relation to finite difference</a></li><li><a href="#18">Approximating integrals using the trapezoidal rule</a></li><li><a href="#22">Approximating integrals using the cumtrapz command</a></li><li><a href="#23">Classroom assignment</a></li></ul></div><h2>Learning outcomes<a name="1"></a></h2><p>At the end of the session you should be able to:</p><div><ul><li>Describe how derivatives can be approximated using finite differences.</li><li>Approximate the derivative of a variable using <tt>diff</tt>.</li><li>Show how finite differences link with trapezoidal integration.</li><li>Approximate the integral of a variable using <tt>cumtrapz</tt>.</li></ul></div><h2>Finite differences<a name="2"></a></h2><p>The basic idea about finite differences is as follows:</p><p>Consider a continuous function <span class="MathJax_Preview"><img src="MATLABsession4_eq13908190722235496338.png" alt="$y=f(x)$"></span><script type="math/tex">y=f(x)</script>.</p><p>Now consider a set of <span class="MathJax_Preview"><img src="MATLABsession4_eq05705075896852816573.png" alt="$N$"></span><script type="math/tex">N</script> number of discrete points along the <span class="MathJax_Preview"><img src="MATLABsession4_eq16247206711595679522.png" alt="$x$"></span><script type="math/tex">x</script> axis <span class="MathJax_Preview"><img src="MATLABsession4_eq06345740723067602754.png" alt="$x=x_1,x_2,x_3,...,x_N$"></span><script type="math/tex">x=x_1,x_2,x_3,...,x_N</script>.</p><p>The corresponding values of <span class="MathJax_Preview"><img src="MATLABsession4_eq14521328786523663806.png" alt="$y$"></span><script type="math/tex">y</script> can be written as <span class="MathJax_Preview"><img src="MATLABsession4_eq04270045933004049161.png" alt="$y_1,y_2,y_3,...,y_N$"></span><script type="math/tex">y_1,y_2,y_3,...,y_N</script>.</p><p>Understand that <span class="MathJax_Preview"><img src="MATLABsession4_eq15199877059934101091.png" alt="$y(x=x_1)=y_1$"></span><script type="math/tex">y(x=x_1)=y_1</script>, <span class="MathJax_Preview"><img src="MATLABsession4_eq15764686052373641864.png" alt="$y(x=x_2)=y_2$"></span><script type="math/tex">y(x=x_2)=y_2</script> and so on.</p><p>An approximation of the derivative of <span class="MathJax_Preview"><img src="MATLABsession4_eq14521328786523663806.png" alt="$y$"></span><script type="math/tex">y</script> with respect to <span class="MathJax_Preview"><img src="MATLABsession4_eq16247206711595679522.png" alt="$x$"></span><script type="math/tex">x</script> can be obtained as follows:</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq10991635206287425388.png" alt="$\displaystyle \left. \frac{dy}{dx} \right|_{x=x_{i-1/2}} \approx \frac{y_i-y_{i-1}}{x_i-x_{i-1}}$"></span><script type="math/tex">\displaystyle \left. \frac{dy}{dx} \right|_{x=x_{i-1/2}} \approx \frac{y_i-y_{i-1}}{x_i-x_{i-1}}</script> where <span class="MathJax_Preview"><img src="MATLABsession4_eq04201909773483004069.png" alt="$i = 2,3,...,N$"></span><script type="math/tex">i = 2,3,...,N</script>.</p><p>The value of the derivative corresponds to the location, <span class="MathJax_Preview"><img src="MATLABsession4_eq11241555588405423800.png" alt="$x=x_{i-1/2}$"></span><script type="math/tex">x=x_{i-1/2}</script> where <span class="MathJax_Preview"><img src="MATLABsession4_eq11008484964398695116.png" alt="$x_{i-1/2}=(x_i+x_{i-1})/2$"></span><script type="math/tex">x_{i-1/2}=(x_i+x_{i-1})/2</script>.</p><p>Note that calculus is often referred to as "infinitesimal calculus". The infinitesimal term refers to the focus on how <span class="MathJax_Preview"><img src="MATLABsession4_eq14521328786523663806.png" alt="$y$"></span><script type="math/tex">y</script> changes over infinitesimal distances. A definition of a derivative can be written as follows:</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq14542351639453045410.png" alt="$\displaystyle \lim_{x_i\rightarrow x_{i-1}}\left. \frac{dy}{dx} \right|_{x=x_{i-1/2}} = \frac{y_i-y_{i-1}}{x_i-x_{i-1}}$"></span><script type="math/tex">\displaystyle \lim_{x_i\rightarrow x_{i-1}}\left. \frac{dy}{dx} \right|_{x=x_{i-1/2}} = \frac{y_i-y_{i-1}}{x_i-x_{i-1}}</script></p><h2>Approximating derivatives using finite differences<a name="3"></a></h2><p>Consider the trigonometric equation</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq18227739812911564820.png" alt="$y = \cos 2x$"></span><script type="math/tex">y = \cos 2x</script></p><p>Differentiating with respect to <span class="MathJax_Preview"><img src="MATLABsession4_eq16247206711595679522.png" alt="$x$"></span><script type="math/tex">x</script> gives</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq03929193765511536319.png" alt="$\displaystyle \frac{dy}{dx} = -2\sin 2x$"></span><script type="math/tex">\displaystyle \frac{dy}{dx} = -2\sin 2x</script></p><p>Creat a new script file and type:</p><pre class="codeinput"><span class="comment">% Some examples demonstrating the principal of differentiation and</span>
+<span class="comment">% integration using finite  differences and trapezoidal integration,</span>
+<span class="comment">% respectively.</span>
+</pre><p>at the top and save in an appropriate place.</p><p>First we will make a series of <span class="MathJax_Preview"><img src="MATLABsession4_eq05705075896852816573.png" alt="$N$"></span><script type="math/tex">N</script> number of equally spaced points from zero to five using the <tt>linspace</tt> command (type "help linspace" in the Command Window to find out more). Following from this will calculate some corresponding values of <span class="MathJax_Preview"><img src="MATLABsession4_eq14521328786523663806.png" alt="$y$"></span><script type="math/tex">y</script> (where <span class="MathJax_Preview"><img src="MATLABsession4_eq09068108117669397433.png" alt="$y=\cos 2x$"></span><script type="math/tex">y=\cos 2x</script>).</p><pre class="codeinput"><span class="comment">%Define number of points for the discretisation of x</span>
+N=7;
+x=linspace(0,5,N)
+<span class="comment">%Calculate corresponding values of y</span>
+y=cos(2*x)
+</pre><pre class="codeoutput">
+x =
+
+         0    0.8333    1.6667    2.5000    3.3333    4.1667    5.0000
+
+
+y =
+
+    1.0000   -0.0957   -0.9817    0.2837    0.9274   -0.4612   -0.8391
+
+</pre><p>Now we will estimate the derivative using finite differences. Note that you can use <tt>end</tt> in the code to automatically identify the number of elements for a given dimension of an array of concern.</p><pre class="codeinput"><span class="comment">%Calculate the change in x, i.e. x(i)-x(i-1)</span>
+dx=x(1,2:end)-x(1,1:end-1)
+<span class="comment">%Calculate the change in y, i.e. y(i)-y(i-1)</span>
+dy=y(1,2:end)-y(1,1:end-1)
+<span class="comment">%Estimate the derivative with respect to x using finite difference</span>
+dydxFD=dy./dx
+</pre><pre class="codeoutput">
+dx =
+
+    0.8333    0.8333    0.8333    0.8333    0.8333    0.8333
+
+
+dy =
+
+   -1.0957   -0.8860    1.2653    0.6437   -1.3886   -0.3779
+
+
+dydxFD =
+
+   -1.3149   -1.0631    1.5184    0.7724   -1.6663   -0.4534
+
+</pre><p>Interestingly, we have only six values of the derivative although we started with seven points. It is important to realise that these derivatives do not correspond directly to the points:</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq01672273565623002075.png" alt="$x_1,x_2,x_3,...,x_N$"></span><script type="math/tex">x_1,x_2,x_3,...,x_N</script></p><p>Rather they correspond to a different set of points:</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq12847346571607195760.png" alt="$x_{2-1/2},x_{3-1/2},x_{4-1/2},...,x_{N-1/2}$"></span><script type="math/tex">x_{2-1/2},x_{3-1/2},x_{4-1/2},...,x_{N-1/2}</script></p><p>of which there are only <span class="MathJax_Preview"><img src="MATLABsession4_eq08224196748734235196.png" alt="$(N-1)$"></span><script type="math/tex">(N-1)</script> in number.</p><p>As discussed earlier, it is possible to locate this latter set of points from</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq11008484964398695116.png" alt="$x_{i-1/2}=(x_i+x_{i-1})/2$"></span><script type="math/tex">x_{i-1/2}=(x_i+x_{i-1})/2</script>, where <span class="MathJax_Preview"><img src="MATLABsession4_eq12075268663758551650.png" alt="$i=2,3,...,N-1$"></span><script type="math/tex">i=2,3,...,N-1</script></p><p>Add the following to your code:</p><pre class="codeinput"><span class="comment">%Calculate the locations at which the derivatives apply</span>
+xMP=(x(1,2:end)+x(1,1:end-1))/2
+</pre><pre class="codeoutput">
+xMP =
+
+    0.4167    1.2500    2.0833    2.9167    3.7500    4.5833
+
+</pre><p>Recall that we know the derivative is, in this case, <span class="MathJax_Preview"><img src="MATLABsession4_eq14354282069338944444.png" alt="$-2\sin 2x$"></span><script type="math/tex">-2\sin 2x</script>. So lets compare:</p><pre class="codeinput"><span class="comment">%Calculate derivative analytically at the xMP points</span>
+dydz=-2*sin(2*xMP)
+</pre><pre class="codeoutput">
+dydz =
+
+   -1.4804   -1.1969    1.7095    0.8697   -1.8760   -0.5105
+
+</pre><p>Now lets make a plot to compare our results graphically</p><pre class="codeinput"><span class="comment">%Plot results</span>
+figure(1)
+clf
+plot(x,y,<span class="string">'k'</span>,xMP,dydz,<span class="string">'b'</span>,xMP,dydxFD,<span class="string">'ro'</span>)
+legend(<span class="string">'y = cos 2x'</span>,<span class="string">'dy/dx Analytical'</span>,<span class="string">'dy/dx Finite difference'</span>)
+xlabel(<span class="string">'x (-)'</span>)
+ylabel(<span class="string">'see legend'</span>)
+title(<span class="string">'Approximate calculus'</span>)
+</pre><img vspace="5" hspace="5" src="MATLABsession4_01.png" alt=""> <p>The accuracy is quite poor because we are using only seven points for our discretisation. Try running your code again with 20 points.</p><p>Although using finite difference techniques to differentiate trigonometric functions seems slightly trivial, we are just using these as a demonstration. The main point to understand is that we can use similar code to approximate the derivative of any function of interest.</p><h2>Approximating derivatives using the diff command<a name="10"></a></h2><p>The <tt>diff</tt> command is a MATLAB command, which can be used to perform the above analysis in a computationally more efficient manner. Type "help diff" in the command window to find out more.</p><p>Note that <tt>diff(X,N,DIM)</tt>, where <tt>X</tt> is the name of the array to be differenced, <tt>N</tt> is the number of times the array us to be differences, and <tt>DIM</tt> is the dimension of the array along which the differencing is to take place.</p><p>To aid our demonstration of <tt>diff</tt>, type the following 2D array in the command window:</p><pre class="codeinput">A=[1 6 5 4 3 2; 5 6 4 4 2 1; 7 8 5 1 1 2]
+</pre><pre class="codeoutput">
+A =
+
+     1     6     5     4     3     2
+     5     6     4     4     2     1
+     7     8     5     1     1     2
+
+</pre><p>Now we are going to look at the difference between each column</p><pre class="codeinput">A(:,2:end)-A(:,1:end-1)
+</pre><pre class="codeoutput">
+ans =
+
+     5    -1    -1    -1    -1
+     1    -2     0    -2    -1
+     1    -3    -4     0     1
+
+</pre><p>The <tt>diff</tt> command can be used to do exactly the same thing by typing:</p><pre class="codeinput">diff(A,1,2)
+</pre><pre class="codeoutput">
+ans =
+
+     5    -1    -1    -1    -1
+     1    -2     0    -2    -1
+     1    -3    -4     0     1
+
+</pre><p>If instead we wanted to look at the difference between each row, we would type:</p><pre class="codeinput">diff(A,1,1)
+</pre><pre class="codeoutput">
+ans =
+
+     4     0    -1     0    -1    -1
+     2     2     1    -3    -1     1
+
+</pre><p>If we wanted to look at the difference of each difference between each row, we would type:</p><pre class="codeinput">diff(A,2,1)
+</pre><pre class="codeoutput">
+ans =
+
+    -2     2     2    -3     0     2
+
+</pre><p>Go back to your script file that you created and add the following code</p><pre class="codeinput">dydxFD=diff(y,1,2)./diff(x,1,2)
+</pre><pre class="codeoutput">
+dydxFD =
+
+   -1.3149   -1.0631    1.5184    0.7724   -1.6663   -0.4534
+
+</pre><p>Above we have calculated the derivative in one line. Note that the <tt>1</tt>, in the <tt>diff</tt> argument, is because we are only taking one difference and the <tt>2</tt> is because we want to difference the columns as opposed to the rows. Recall that <tt>x</tt> and <tt>y</tt> are row vectors.</p><h2>Trapezoidal rule and its relation to finite difference<a name="17"></a></h2><p>Recall that integration is the reverse of differentiation. Whereas differentiation corresponds to finding the gradient of a line on a graph, integration corresponds to finding the area under a line.</p><p>A simple way to approximate an integral is to apply the so-called trapezoidal rule. Click on this  link <a href="http://mathworld.wolfram.com/TrapezoidalRule.html">http://mathworld.wolfram.com/TrapezoidalRule.html</a> TrapezoidalRule for an illustration.</p><p>Recalling that integration is the reverse of differentiation. Consider again the finite difference approximation</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq10991635206287425388.png" alt="$\displaystyle \left. \frac{dy}{dx} \right|_{x=x_{i-1/2}} \approx \frac{y_i-y_{i-1}}{x_i-x_{i-1}}$"></span><script type="math/tex">\displaystyle \left. \frac{dy}{dx} \right|_{x=x_{i-1/2}} \approx \frac{y_i-y_{i-1}}{x_i-x_{i-1}}</script> where <span class="MathJax_Preview"><img src="MATLABsession4_eq04201909773483004069.png" alt="$i = 2,3,...,N$"></span><script type="math/tex">i = 2,3,...,N</script></p><p>For convenience, let us say <span class="MathJax_Preview"><img src="MATLABsession4_eq05968959977208299293.png" alt="$dy/dx=J$"></span><script type="math/tex">dy/dx=J</script> such that</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq09878880803353438851.png" alt="$\displaystyle J_{i-1/2} \approx \frac{y_i-y_{i-1}}{x_i-x_{i-1}}$"></span><script type="math/tex">\displaystyle J_{i-1/2} \approx \frac{y_i-y_{i-1}}{x_i-x_{i-1}}</script></p><p>It can also be said</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq02113025731190804582.png" alt="$\displaystyle y=\int J dx$"></span><script type="math/tex">\displaystyle y=\int J dx</script></p><p>Rearranging the finite difference equation above such that <span class="MathJax_Preview"><img src="MATLABsession4_eq14675076360472238679.png" alt="$y_i$"></span><script type="math/tex">y_i</script> is the subject of the formula we get</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq04334105614489969439.png" alt="$y_i \approx J_{i-1/2}(x_i-x_{i-1})+y_{i-1}$"></span><script type="math/tex">y_i \approx J_{i-1/2}(x_i-x_{i-1})+y_{i-1}</script></p><p>In the same way that <span class="MathJax_Preview"><img src="MATLABsession4_eq11008484964398695116.png" alt="$x_{i-1/2}=(x_i+x_{i-1})/2$"></span><script type="math/tex">x_{i-1/2}=(x_i+x_{i-1})/2</script>, it can also be said that <span class="MathJax_Preview"><img src="MATLABsession4_eq04753349986646632423.png" alt="$J_{i-1/2}=(J_i+J_{i-1})/2$"></span><script type="math/tex">J_{i-1/2}=(J_i+J_{i-1})/2</script>, from which it can be seen</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq05707826542546339022.png" alt="$\displaystyle y_i \approx \left(\frac{J_{i}+J_{i-1}}{2}\right)(x_i-x_{i-1})+y_{i-1}$"></span><script type="math/tex">\displaystyle y_i \approx \left(\frac{J_{i}+J_{i-1}}{2}\right)(x_i-x_{i-1})+y_{i-1}</script></p><p>which is essentially a mathematical expression of the trapezoidal rule.</p><h2>Approximating integrals using the trapezoidal rule<a name="18"></a></h2><p>Consider again the trigonometric equation</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq18227739812911564820.png" alt="$y = \cos 2x$"></span><script type="math/tex">y = \cos 2x</script></p><p>Integrating with respect to <span class="MathJax_Preview"><img src="MATLABsession4_eq16247206711595679522.png" alt="$x$"></span><script type="math/tex">x</script> gives</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq17878570108704836218.png" alt="$\displaystyle F = \int y dx = \frac{1}{2}\sin 2x + C$"></span><script type="math/tex">\displaystyle F = \int y dx = \frac{1}{2}\sin 2x + C</script></p><p>where <span class="MathJax_Preview"><img src="MATLABsession4_eq08596374860807106346.png" alt="$C$"></span><script type="math/tex">C</script> is an integration constant.</p><p>Let us now impose the constraint that <span class="MathJax_Preview"><img src="MATLABsession4_eq05194326847549535147.png" alt="$F=3$"></span><script type="math/tex">F=3</script> when <span class="MathJax_Preview"><img src="MATLABsession4_eq08563454213684156363.png" alt="$x =0$"></span><script type="math/tex">x =0</script>. It follows that <span class="MathJax_Preview"><img src="MATLABsession4_eq16518185750268157903.png" alt="$C = 3$"></span><script type="math/tex">C = 3</script>. Therefore</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq01162538368913054546.png" alt="$\displaystyle F = 3+\frac{1}{2}\sin 2 x$"></span><script type="math/tex">\displaystyle F = 3+\frac{1}{2}\sin 2 x</script></p><p>We now wish to approximate <span class="MathJax_Preview"><img src="MATLABsession4_eq01768238589472138476.png" alt="$F$"></span><script type="math/tex">F</script> using the trapezoidal rule.</p><p>From the previous discussion we can say that</p><p><span class="MathJax_Preview"><img src="MATLABsession4_eq00872234219331361858.png" alt="$\displaystyle F_i \approx \left(\frac{y_{i}+y_{i-1}}{2}\right)(x_i-x_{i-1})+F_{i-1}$"></span><script type="math/tex">\displaystyle F_i \approx \left(\frac{y_{i}+y_{i-1}}{2}\right)(x_i-x_{i-1})+F_{i-1}</script></p><p>To explore this further let us add the following code to our script file:</p><pre class="codeinput"><span class="comment">%Initialise a vector of zeros called Ftrapz</span>
+Ftrapz=zeros(1,N);
+<span class="comment">%Estimate the integral of y with respect to x using the trapezoidal rule</span>
+<span class="keyword">for</span> i=2:N
+    Ftrapz(1,i)=(y(1,i)+y(1,i-1))/2*(x(1,i)-x(1,i-1))+Ftrapz(1,i-1);
+<span class="keyword">end</span>
+<span class="comment">%Display result in the command window</span>
+disp(Ftrapz)
+</pre><pre class="codeoutput">         0    0.3768   -0.0721   -0.3630    0.1416    0.3359   -0.2059
+
+</pre><p>Now lets add some code to compare the result to the analytical solution:</p><pre class="codeinput"><span class="comment">%Calculate values F using the analytical function from notes</span>
+F=3+sin(2*x)/2
+</pre><pre class="codeoutput">
+F =
+
+    3.0000    3.4977    2.9047    2.5205    3.1871    3.4436    2.7280
+
+</pre><p>Note that we also need to apply our constraint $ F(x=0)=3 $ to the trapezoidal integration result. This can be done as follows:</p><pre class="codeinput"><span class="comment">%Apply constraint to trapezoidal integration</span>
+Ftrapz=Ftrapz-Ftrapz(1,1)+3
+</pre><pre class="codeoutput">
+Ftrapz =
+
+    3.0000    3.3768    2.9279    2.6370    3.1416    3.3359    2.7941
+
+</pre><p>What we have done is subtracted the first value of <tt>Ftrapz</tt>, which corresponds to <span class="MathJax_Preview"><img src="MATLABsession4_eq06345561949423726373.png" alt="$x = 0$"></span><script type="math/tex">x = 0</script> in this case, from all the values of <tt>F</tt>. We have then added on the correct value at <span class="MathJax_Preview"><img src="MATLABsession4_eq06345561949423726373.png" alt="$x = 0$"></span><script type="math/tex">x = 0</script>, which according to our constraint, is 3.</p><pre class="codeinput"><span class="comment">%Plot results</span>
+figure(1)
+hold <span class="string">on</span> <span class="comment">%Plot new results in figure(1) alongside previous results</span>
+plot(x,F,<span class="string">'g'</span>,x,Ftrapz,<span class="string">'k:s'</span>)
+legend(<span class="string">'y = cos 2x'</span>,<span class="string">'dy/dx Analytical'</span>,<span class="string">'dy/dx Finite difference'</span>,<span class="keyword">...</span>
+    <span class="string">'\int y dx Analytical'</span>,<span class="string">'\int y dx Trapezoidal'</span>)
+legend(<span class="string">'location'</span>,<span class="string">'eastoutside'</span>)
+</pre><img vspace="5" hspace="5" src="MATLABsession4_02.png" alt=""> <h2>Approximating integrals using the cumtrapz command<a name="22"></a></h2><p>The <tt>cumtrapz</tt> command is a MATLAB command, which can be used to perform exactly the same analysis above in a computationally more efficient manner. Type "help cumtrapz" in the command window to find out more.</p><p>Note that <tt>cumtrapz(X,Y,DIM)</tt>, where <tt>X</tt> is the name of the array to be integrated with respect to, <tt>Y</tt> is the array to be integrated, and <tt>DIM</tt> is the dimension of the array along which the integrating is to take place.</p><p>Add the following code to your script file to repeat the integration using <tt>cumtrapz</tt>:</p><pre class="codeinput"><span class="comment">%Use cumtrapz to integrate y with respect to x</span>
+Fcumtrapz=cumtrapz(x,y,2);
+<span class="comment">%Apply constraint</span>
+Fcumtrapz=Fcumtrapz-Fcumtrapz(1,1)+3
+</pre><pre class="codeoutput">
+Fcumtrapz =
+
+    3.0000    3.3768    2.9279    2.6370    3.1416    3.3359    2.7941
+
+</pre><h2>Classroom assignment<a name="23"></a></h2><p>Make a new script file and write a subfunction to both differentiate and integrate a given set of dependent and independent variables using <tt>diff</tt> and <tt>cumtrapz</tt> (if one differentiates <span class="MathJax_Preview"><img src="MATLABsession4_eq14521328786523663806.png" alt="$y$"></span><script type="math/tex">y</script> with respect to <span class="MathJax_Preview"><img src="MATLABsession4_eq16247206711595679522.png" alt="$x$"></span><script type="math/tex">x</script>, <span class="MathJax_Preview"><img src="MATLABsession4_eq14521328786523663806.png" alt="$y$"></span><script type="math/tex">y</script> and <span class="MathJax_Preview"><img src="MATLABsession4_eq16247206711595679522.png" alt="$x$"></span><script type="math/tex">x</script> are known as the dependent and independent variables, respectively).</p><p>Then write some additional script to use your subfunction to both differentiate and integrate the following functions  for <span class="MathJax_Preview"><img src="MATLABsession4_eq10037277645212948393.png" alt="$0 < x < 2$"></span><script type="math/tex">0 < x < 2</script>:</p><p>1) <span class="MathJax_Preview"><img src="MATLABsession4_eq12878643694175443793.png" alt="$y = 5x^2 + 2x +2$"></span><script type="math/tex">y = 5x^2 + 2x +2</script></p><p>2) <span class="MathJax_Preview"><img src="MATLABsession4_eq06744913107863064178.png" alt="$y = e^x$"></span><script type="math/tex">y = e^x</script></p><p>3) <span class="MathJax_Preview"><img src="MATLABsession4_eq16372339817492783409.png" alt="$y = (1+x^2)^{-1}$"></span><script type="math/tex">y = (1+x^2)^{-1}</script></p><p>For each equation apply a constraint such that the integrals all equal 1 when <span class="MathJax_Preview"><img src="MATLABsession4_eq06345561949423726373.png" alt="$x = 0$"></span><script type="math/tex">x = 0</script>.</p><p>Write further code to plot your results appropriately on a single figure with three subplots. Compare your results with analytical results where possible. You may find www.wolframalpha.com useful in this respect.</p><p>An example MATLAB code, containing all of the instructions requested above, is given in <a href="https://samathiasuk.github.io/MATLABnotes/MATLABsession4_Assignment.m">MATLABsession4_Assignment.m</a>.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% MATLAB Notes: Session 4 - Approximate methods for differentiation and integration
+%
+% Simon Mathias
+%
+% Department of Engineering
+%
+% Durham University
+%
+% <https://samathiasuk.github.io/MATLABnotes/html/MATLABcontents.html Return to main contents page>
+%
+%% Learning outcomes
+%
+% At the end of the session you should be able to:
+%
+% * Describe how derivatives can be approximated using finite differences.
+% * Approximate the derivative of a variable using |diff|.
+% * Show how finite differences link with trapezoidal integration.
+% * Approximate the integral of a variable using |cumtrapz|.
+%
+%% Finite differences
+%
+%
+% The basic idea about finite differences is as follows:
+%
+% Consider a continuous function $y=f(x)$.
+%
+% Now consider a set of $N$ number of discrete points along the $x$ 
+% axis $x=x_1,x_2,x_3,...,x_N$.
+%
+% The corresponding values of $y$ can be written as $y_1,y_2,y_3,...,y_N$.
+%
+% Understand that $y(x=x_1)=y_1$, $y(x=x_2)=y_2$ and so on.
+%
+% An approximation of the derivative
+% of $y$ with respect to $x$ can be obtained as follows:
+%
+% $\displaystyle \left. \frac{dy}{dx} \right|_{x=x_{i-1/2}} \approx
+% \frac{y_i-y_{i-1}}{x_i-x_{i-1}}$ where $i = 2,3,...,N$.     
+%
+% The value of the derivative corresponds to the location, $x=x_{i-1/2}$
+% where $x_{i-1/2}=(x_i+x_{i-1})/2$.
+%
+% Note that calculus is often referred to as "infinitesimal
+% calculus". The infinitesimal term refers to the focus on how $y$ 
+% changes over infinitesimal distances. A definition of a
+% derivative can be written as follows:
+%
+% $\displaystyle \lim_{x_i\rightarrow x_{i-1}}\left. \frac{dy}{dx}
+% \right|_{x=x_{i-1/2}} =
+% \frac{y_i-y_{i-1}}{x_i-x_{i-1}}$ 
+% 
+%% Approximating derivatives using finite differences
+%
+% Consider the trigonometric equation
+%
+% $y = \cos 2x$
+%
+% Differentiating with respect to $x$ gives
+%
+% $\displaystyle \frac{dy}{dx} = -2\sin 2x$
+%
+% Creat a new script file and type:
+ 
+% Some examples demonstrating the principal of differentiation and 
+% integration using finite  differences and trapezoidal integration, 
+% respectively.
+ 
+%%
+% at the top and save in an appropriate place.
+%
+% First we will make a series of $N$ number of equally spaced points from zero to five
+% using the |linspace| command (type "help linspace" in the Command Window
+% to find out more). Following from this will calculate some corresponding
+% values of $y$ (where $y=\cos 2x$).
+ 
+%Define number of points for the discretisation of x
+N=7;
+x=linspace(0,5,N)
+%Calculate corresponding values of y
+y=cos(2*x)
+ 
+%%
+% Now we will estimate the derivative using finite differences. Note that
+% you can use |end| in the code to automatically identify the number of
+% elements for a given dimension of an array of concern.
+ 
+%Calculate the change in x, i.e. x(i)-x(i-1)
+dx=x(1,2:end)-x(1,1:end-1)
+%Calculate the change in y, i.e. y(i)-y(i-1)
+dy=y(1,2:end)-y(1,1:end-1)
+%Estimate the derivative with respect to x using finite difference
+dydxFD=dy./dx
+ 
+%%
+% Interestingly, we have only six values of the derivative although we started with seven
+% points. It is important to realise that these derivatives do not
+% correspond directly to the points:
+%
+% $x_1,x_2,x_3,...,x_N$
+%
+% Rather they correspond to a different set of points:
+%
+% $x_{2-1/2},x_{3-1/2},x_{4-1/2},...,x_{N-1/2}$
+%
+% of which there are only $(N-1)$ in number.
+%
+% As discussed earlier, it is possible to locate this latter set of points from
+%
+% $x_{i-1/2}=(x_i+x_{i-1})/2$, where $i=2,3,...,N-1$
+%
+% Add the following to your code:
+ 
+%Calculate the locations at which the derivatives apply
+xMP=(x(1,2:end)+x(1,1:end-1))/2
+ 
+%%
+% Recall that we know the derivative is, in this case, 
+% $-2\sin 2x$. So lets compare:
+ 
+%Calculate derivative analytically at the xMP points
+dydz=-2*sin(2*xMP)
+ 
+%%
+% Now lets make a plot to compare our results graphically
+ 
+%Plot results
+figure(1)
+clf
+plot(x,y,'k',xMP,dydz,'b',xMP,dydxFD,'ro')
+legend('y = cos 2x','dy/dx Analytical','dy/dx Finite difference')
+xlabel('x (-)')
+ylabel('see legend')
+title('Approximate calculus')
+ 
+%%
+% The accuracy is quite poor because we are using only seven
+% points for our discretisation. Try running your code again with 20
+% points.
+%
+% Although using finite difference techniques to differentiate trigonometric
+% functions seems slightly trivial, we are just using these as a
+% demonstration. The main point to understand is that we can use similar
+% code to approximate the derivative of any function of interest.
+%
+%% Approximating derivatives using the diff command
+%
+% The |diff| command is a MATLAB command, which can be used to perform the
+% above analysis in a computationally more efficient manner. Type "help
+% diff" in the command window to find out more.
+%
+% Note that |diff(X,N,DIM)|, where |X| is the name of the array to be differenced, |N| is the number
+% of times the array us to be differences, and |DIM| is the dimension of
+% the array along which the differencing is to take place.
+%
+% To aid our demonstration of |diff|, type the following 2D array in the command window:
+ 
+A=[1 6 5 4 3 2; 5 6 4 4 2 1; 7 8 5 1 1 2]
+ 
+%%
+% Now we are going to look at the difference between each column
+ 
+A(:,2:end)-A(:,1:end-1)
+ 
+%%
+% The |diff| command can be used to do exactly the same thing by typing:
+ 
+diff(A,1,2)
+ 
+%%
+% If instead we wanted to look at the difference between each row, we would
+% type:
+ 
+diff(A,1,1)
+ 
+%%
+% If we wanted to look at the difference of each difference between each
+% row, we would type:
+ 
+diff(A,2,1)
+ 
+%%
+% Go back to your script file that you created and add the following code
+ 
+dydxFD=diff(y,1,2)./diff(x,1,2)
+ 
+%%
+% Above we have calculated the derivative in one line. Note that the |1|, 
+% in the |diff| argument, is
+% because we are only taking one difference and the |2| is because we want
+% to difference the columns as opposed to the rows. Recall that |x| and
+% |y| are row vectors.
+ 
+%% Trapezoidal rule and its relation to finite difference
+%
+% Recall that integration is the reverse of differentiation. Whereas
+% differentiation corresponds to finding the gradient of a line on a graph,
+% integration corresponds to finding the area under a line.
+%
+% A simple way to approximate an integral is to apply the so-called
+% trapezoidal rule. Click on this  link
+% http://mathworld.wolfram.com/TrapezoidalRule.html
+% TrapezoidalRule for an illustration.
+%
+% Recalling that integration is the reverse of differentiation. Consider
+% again the finite difference approximation
+%
+% $\displaystyle \left. \frac{dy}{dx} \right|_{x=x_{i-1/2}} \approx
+% \frac{y_i-y_{i-1}}{x_i-x_{i-1}}$ where $i = 2,3,...,N$
+%
+% For convenience, let us say $dy/dx=J$ such that
+%
+% $\displaystyle J_{i-1/2} \approx
+% \frac{y_i-y_{i-1}}{x_i-x_{i-1}}$
+%
+% It can also be said
+%
+% $\displaystyle y=\int J dx$
+%
+% Rearranging the finite difference equation above such that $y_i$ is the
+% subject of the formula we get
+%
+% $y_i \approx J_{i-1/2}(x_i-x_{i-1})+y_{i-1}$
+%
+% In the same way that $x_{i-1/2}=(x_i+x_{i-1})/2$, it can also be said
+% that $J_{i-1/2}=(J_i+J_{i-1})/2$, from which it can be seen 
+%
+% $\displaystyle y_i \approx \left(\frac{J_{i}+J_{i-1}}{2}\right)(x_i-x_{i-1})+y_{i-1}$
+%
+% which is essentially a mathematical expression of the trapezoidal rule.
+ 
+%% Approximating integrals using the trapezoidal rule
+%
+% Consider again the trigonometric equation
+%
+% $y = \cos 2x$
+%
+% Integrating with respect to $x$ gives
+%
+% $\displaystyle F = \int y dx = \frac{1}{2}\sin 2x + C$
+% 
+% where $C$ is an integration constant.
+%
+% Let us now impose the constraint that $F=3$ when $x =0$. It
+% follows that $C = 3$. Therefore 
+%
+% $\displaystyle F = 3+\frac{1}{2}\sin 2 x$
+%
+% We now wish to approximate $F$ using the trapezoidal rule.
+%
+% From the previous discussion we can say that
+%
+% $\displaystyle F_i \approx \left(\frac{y_{i}+y_{i-1}}{2}\right)(x_i-x_{i-1})+F_{i-1}$
+%
+% To explore this further let us add the following code to our script file:
+ 
+%Initialise a vector of zeros called Ftrapz
+Ftrapz=zeros(1,N);
+%Estimate the integral of y with respect to x using the trapezoidal rule
+for i=2:N
+    Ftrapz(1,i)=(y(1,i)+y(1,i-1))/2*(x(1,i)-x(1,i-1))+Ftrapz(1,i-1);
+end
+%Display result in the command window
+disp(Ftrapz)
+ 
+%%
+% Now lets add some code to compare the result to the analytical solution:
+ 
+%Calculate values F using the analytical function from notes
+F=3+sin(2*x)/2
+ 
+%%
+% Note that we also need to apply our constraint $ F(x=0)=3 $ to the trapezoidal
+% integration result. This can be done as follows:
+ 
+%Apply constraint to trapezoidal integration
+Ftrapz=Ftrapz-Ftrapz(1,1)+3
+ 
+%%
+% What we have done is subtracted the first value of |Ftrapz|, which 
+% corresponds to $x = 0$ in this case, from all the values of |F|. We
+% have then added on the correct value at $x = 0$, which according to
+% our constraint, is 3.
+ 
+%Plot results
+figure(1)
+hold on %Plot new results in figure(1) alongside previous results
+plot(x,F,'g',x,Ftrapz,'k:s')
+legend('y = cos 2x','dy/dx Analytical','dy/dx Finite difference',...
+    '\int y dx Analytical','\int y dx Trapezoidal')
+legend('location','eastoutside')
+ 
+%% Approximating integrals using the cumtrapz command
+%
+% The |cumtrapz| command is a MATLAB command, which can be used to perform
+% exactly the same analysis above in a computationally more efficient manner. Type "help
+% cumtrapz" in the command window to find out more.
+%
+% Note that |cumtrapz(X,Y,DIM)|, where |X| is the name of the array to be 
+% integrated with respect to, |Y| is the array to be integrated, and |DIM| is the dimension of
+% the array along which the integrating is to take place.
+%
+% Add the following code to your script file to repeat the integration
+% using |cumtrapz|:
+ 
+%Use cumtrapz to integrate y with respect to x
+Fcumtrapz=cumtrapz(x,y,2);
+%Apply constraint
+Fcumtrapz=Fcumtrapz-Fcumtrapz(1,1)+3
+ 
+%% Classroom assignment
+%
+% Make a new script file and write a subfunction to both differentiate and
+% integrate a given set of dependent and independent variables using |diff| 
+% and |cumtrapz| (if one differentiates $y$ with respect to $x$,
+% $y$ and $x$ are known as the dependent and independent variables,
+% respectively).
+%
+% Then write some additional script to use your subfunction to 
+% both differentiate and integrate the following
+% functions  for $0 < x < 2$:
+%
+% 1) $y = 5x^2 + 2x +2$
+%
+% 2) $y = e^x$
+%
+% 3) $y = (1+x^2)^{-1}$
+%
+% For each equation apply a constraint such that the integrals all equal 1
+% when $x = 0$.
+%
+% Write further code to plot your results appropriately on a single
+% figure with three subplots. Compare your results with analytical results
+% where possible. You may find www.wolframalpha.com useful in this respect.
+% 
+% An example MATLAB code, containing all of the instructions requested
+% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession4_Assignment.m MATLABsession4_Assignment.m>.
+ 
+ 
+
+
+
+##### SOURCE END #####
+--></body></html>

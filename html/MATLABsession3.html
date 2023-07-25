@@ -1,0 +1,931 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MATLAB Notes: Session 3 - Using subfunctions</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-07-25"><meta name="DC.source" content="MATLABsession3.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>MATLAB Notes: Session 3 - Using subfunctions</h1><!--introduction--><p>Simon Mathias</p><p>Department of Engineering</p><p>Durham University</p><p><a href="https://samathiasuk.github.io/MATLABnotes/html/MATLABcontents.html">Return to main contents page</a></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Learning outcomes</a></li><li><a href="#2">Cumulative distribution functions</a></li><li><a href="#8">Saving and loading data in MAT files</a></li><li><a href="#10">Ranking data using sort</a></li><li><a href="#13">Comparison with the normal distribution</a></li><li><a href="#15">Application of subfunctions</a></li><li><a href="#16">Classroom assignment</a></li></ul></div><h2>Learning outcomes<a name="1"></a></h2><p>At the end of the session you should be able to:</p><div><ul><li>Construct and interpret a cumulative distribution plot.</li><li>Rank data using sort.</li><li>Organise a script file using subfunctions.</li><li>Save and load data in mat files.</li></ul></div><h2>Cumulative distribution functions<a name="2"></a></h2><p>In the last two weeks we have been learning how to import and manipulate data from excel spreadsheets. We have also applied some basic statistical procedures. This week we will develop our code further to develop a a probabilistic analysis of the Durham weather dataset. In this way, we will be applying similar techniques to different variables of interest. Application of subfunctions will make the task much easier.</p><p>But first, we will introduce some basic probability theory:</p><p>Consider a set of 5 measurements of a given variable, xn</p><pre class="codeinput"><span class="comment">%-----------</span>
+<span class="comment">% n     xn</span>
+<span class="comment">%-----------</span>
+<span class="comment">% 1     35</span>
+<span class="comment">% 2     27</span>
+<span class="comment">% 3     30</span>
+<span class="comment">% 4     10</span>
+<span class="comment">% 5     25</span>
+<span class="comment">%------------</span>
+</pre><p>If we rank these from small to large we get:</p><pre class="codeinput"><span class="comment">%-----------</span>
+<span class="comment">% m     xm</span>
+<span class="comment">%-----------</span>
+<span class="comment">% 1     10</span>
+<span class="comment">% 2     25</span>
+<span class="comment">% 3     27</span>
+<span class="comment">% 4     30</span>
+<span class="comment">% 5     35</span>
+<span class="comment">%------------</span>
+</pre><p>The probability of not exceeding a value, xm, in the future, P, can be estimated from the so-called Weibull plotting position:</p><p>P = m / (N+1)</p><p>where m is the associated rank number of the value, xm, and N is the number of values of x that have been previously observed.</p><p>For the table above we can therefore say:</p><pre class="codeinput"><span class="comment">%-----------------------------</span>
+<span class="comment">% m     xm      P</span>
+<span class="comment">%-----------------------------</span>
+<span class="comment">% 1     10      1/6 = 0.17</span>
+<span class="comment">% 2     25      2/6 = 0.33</span>
+<span class="comment">% 3     27      3/6 = 0.50</span>
+<span class="comment">% 4     30      4/6 = 0.67</span>
+<span class="comment">% 5     35      5/6 = 0.83</span>
+<span class="comment">%-----------------------------</span>
+</pre><p>Note that the need to add 1 to N is a way of avoiding the idea that it is impossible to exceed the largest value that has been previously observed.</p><p>The above table represents a discrete set of points from the so-called cumulative distribution function (CDF) of the data.</p><p>Open MATLAB.</p><p>Click on "File", "New", "Script". The "Editor" window should now appear. Save the file as "MATLABsession3_Assignment.m" in the your "MATLABnotes" directory.</p><p>At the top of the window paste the following code.</p><pre class="codeinput"><span class="keyword">function</span> MATLABsession3_Assignment
+</pre><pre class="codeinput"><span class="comment">%Import Durham weather data from excel</span>
+data=readmatrix(<span class="string">'DurhamWeather.xlsx'</span>,<span class="string">'Sheet'</span>,<span class="string">'Sheet1'</span>);
+<span class="comment">%Extract years and store in yyyy</span>
+yyyy=data(:,1);
+<span class="comment">%Extract months and store in mm</span>
+mm=data(:,2);
+<span class="comment">%Extract monthly rainfall and store in rain</span>
+rain=data(:,6);
+<span class="comment">%Generate a column vector of the years of interest</span>
+YEAR=[1880:2011]';
+<span class="comment">%Count how many years we are interested in and store in M</span>
+M=numel(YEAR);
+<span class="comment">%Perform a loop for each year of interest</span>
+<span class="keyword">for</span> i=1:M
+    <span class="comment">%Obtain the locations of all yyyy which are equal to the ith YEAR</span>
+    condition=yyyy==YEAR(i,1);
+    ind=find(condition);
+    <span class="comment">%Store all rain data for year of interest in rainYEAR</span>
+    rainYEAR=rain(ind,1);
+    <span class="comment">%Calculate annual mean rainfall for that year</span>
+    <span class="comment">%and store as the ith value of rainANNUAL</span>
+    rainANNUAL(i,1)=mean(rainYEAR,1);
+<span class="keyword">end</span>
+<span class="comment">%Check which variables are available in the workspace</span>
+whos
+</pre><pre class="codeoutput">  Name               Size            Bytes  Class      Attributes
+
+  M                  1x1                 8  double               
+  YEAR             132x1              1056  double               
+  condition       1591x1              1591  logical              
+  data            1591x7             89096  double               
+  i                  1x1                 8  double               
+  ind               12x1                96  double               
+  mm              1591x1             12728  double               
+  rain            1591x1             12728  double               
+  rainANNUAL       132x1              1056  double               
+  rainYEAR          12x1                96  double               
+  yyyy            1591x1             12728  double               
+
+</pre><p>Run the file by pressing the green arrow at the top of the editor window.</p><p>Similar to in the previous session, we have imported the Durham monthly rainfall time-series but this time generated a corresponding sequence of annual mean rainfall time-series.</p><p>Now type <tt>whos</tt> in the command window. You will notice that the variables, previously listed following the specification of <tt>whos</tt> in our MATLAB code, no longer exist in the workspace. This is because we have started our MATLAB code with the line</p><pre class="language-matlab"><span class="keyword">function</span> MATLABsession3_Assignment
+</pre><p>Whenever you start an mfile with a function heading like that, it transforms the mfile into a function.</p><p>Normally a function heading looks something like</p><pre class="language-matlab"><span class="keyword">function</span> [y1,y2,y3]=MyFunctionName(x1,x2,x3,x4)
+</pre><p>where <tt>MyFunctionName</tt> is the name of the function, <tt>x1,x2,x3,x4</tt> are input variables for the function and <tt>y1,y2,y3</tt> are output variables from the function. You can have as many input and output variables as you like.</p><p>By stating</p><pre class="language-matlab"><span class="keyword">function</span> MATLABsession3_Assignment
+</pre><p>we are saying that the name of the function is <tt>MATLABsession3_Assignment</tt> and that there are no input or output variables. The reason that there are no variables in our workspace, following execution of <tt>MATLABsession3_Assignment</tt>, is that no output variables in the function heading are declared.</p><p>It is useful to state <tt>function MATLABsession3_Assignment</tt> at the beginning of our MATLAB code because it will enable us to subsequently use subfunctions, which is the main subject of this session.</p><h2>Saving and loading data in MAT files<a name="8"></a></h2><p>Now add the following to our mfile:</p><pre class="codeinput"><span class="comment">%Save all the generated data in a MAT file</span>
+save(<span class="string">'AnnualData.mat'</span>)
+
+<span class="comment">%Load the generated data stored in the MAT file</span>
+load(<span class="string">'AnnualData.mat'</span>)
+
+<span class="comment">%Check which variables are available in the workspace</span>
+whos
+</pre><pre class="codeoutput">  Name               Size            Bytes  Class      Attributes
+
+  M                  1x1                 8  double               
+  YEAR             132x1              1056  double               
+  condition       1591x1              1591  logical              
+  data            1591x7             89096  double               
+  i                  1x1                 8  double               
+  ind               12x1                96  double               
+  mm              1591x1             12728  double               
+  rain            1591x1             12728  double               
+  rainANNUAL       132x1              1056  double               
+  rainYEAR          12x1                96  double               
+  yyyy            1591x1             12728  double               
+
+</pre><p>We have saved everything generated prior to the line "|save('AnnualData.mat')|" in a file called <tt>AnnualData.mat</tt>. Now comment everything from the line starting with "|data=readmatrix(<tt>..." down to "|save('AnnualData.mat')</tt>". This can be done by highlighting all the code of concern, rightclicking and choosing "comment". All the text highlighted should now be preceeded with a % sign on each line and should be colored green. Now run.</p><p>Note that "whos" verifies that we are able access all the data in <tt>AnnualData.mat</tt> % due the line "|load(AnnualData.mat)|". The neat thing about this is that loading the data in this way is much faster than regenerating the data from scratch each time.</p><h2>Ranking data using sort<a name="10"></a></h2><p>To generate the CDF for the annual mean rain data we first need to rank the data. The recommended MATLAB command for this purpose is <tt>sort</tt>. Type "|help sort|" in the Command Window to find out more.</p><p>The command, <tt>sort</tt>, can be used to rank the data in either the columns or rows of a 2D array.</p><p>Type the following in the Command Window</p><pre class="codeinput">A=[2 5 8 6; 9 4 3 1; 7 12 10 11]
+sort(A,1)
+</pre><pre class="codeoutput">
+A =
+
+     2     5     8     6
+     9     4     3     1
+     7    12    10    11
+
+
+ans =
+
+     2     4     3     1
+     7     5     8     6
+     9    12    10    11
+
+</pre><p>Applying <tt>sort(A,1)</tt> has ranked all the columns in A from smallest to largest. Now try</p><pre class="codeinput">sort(A,2)
+</pre><pre class="codeoutput">
+ans =
+
+     2     5     6     8
+     1     3     4     9
+     7    10    11    12
+
+</pre><p>We have now ranked all the rows from smallest to largest</p><p>To generate and plot the CDF for Durham's annual rainfall paste the following additional code into "MATLABsession3_Assignment.m":</p><pre class="codeinput"><span class="comment">%Rank the rain from smallest to largest</span>
+RankedRain=sort(rainANNUAL,1);
+<span class="comment">%Count the number of data points</span>
+M=numel(RankedRain);
+<span class="comment">%Generate the rank numbers (i.e., numbers from 1 to M in increments of 1)</span>
+m=[1:M]';
+<span class="comment">%Calculate probability of non-exceedance using Weibull plotting position</span>
+P=m/(M+1);
+
+figure(1)
+clf
+<span class="comment">%Plot data as x-y scatter</span>
+plot(RankedRain,P,<span class="string">'.'</span>)
+<span class="comment">%Note that typing in '.' cause the results to be plotted as dots.</span>
+xlabel(<span class="string">'Annual mean rainfall (mm/month)'</span>)
+ylabel(<span class="string">'Probability of non-exceedance'</span>)
+title(<span class="string">'Rainfall in Durham from 1880 to 2012'</span>)
+</pre><img vspace="5" hspace="5" src="MATLABsession3_01.png" alt=""> <h2>Comparison with the normal distribution<a name="13"></a></h2><p>Most of you will be familiar with calculating the mean, <span class="MathJax_Preview"><img src="MATLABsession3_eq06904339251718989188.png" alt="$\mu$"></span><script type="math/tex">\mu</script>, of data. Many of you will also be familiar with the so-called standard deviation, <span class="MathJax_Preview"><img src="MATLABsession3_eq09992033592989221171.png" alt="$\sigma$"></span><script type="math/tex">\sigma</script>. The significance of these variables is best understood in the context of the normal distribution probability density function:</p><p><span class="MathJax_Preview"><img src="MATLABsession3_eq13081497475531644100.png" alt="$$ \displaystyle f(x)=\frac{1}{\sigma \sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)} $$"></span><script type="math/tex"> \displaystyle f(x)=\frac{1}{\sigma \sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)} </script></p><p>The associated cumulative distribution function is obtained from</p><p><span class="MathJax_Preview"><img src="MATLABsession3_eq15137581887325481358.png" alt="$$ \displaystyle P(x) = \int_{-\infty}^x f(\xi) d\xi = \frac{1}{2}\mathrm{erfc}\left(\frac{\mu-x}{\sigma\sqrt 2}\right) $$"></span><script type="math/tex"> \displaystyle P(x) = \int_{-\infty}^x f(\xi) d\xi = \frac{1}{2}\mathrm{erfc}\left(\frac{\mu-x}{\sigma\sqrt 2}\right) </script></p><p>where erfc denotes the so-called complementary error function. This, of course is already available in MATLAB. Type "|help erfc|" in the Command Window and find out more.</p><p>It is often interesting to compare an empirical cdf (as we have previously obtained from our rainfall data) with a theoretical normal cdf. Add the following code to "MATLABsession3_Assignment.m"</p><pre class="codeinput"><span class="comment">%Calculate mean</span>
+mu=mean(RankedRain,1);
+<span class="comment">%Calculate a standard deviation</span>
+sigma=std(RankedRain,[],1);
+
+<span class="comment">%Generate a set of 50 equally spaced points from the min to the max</span>
+rainMIN=min(RankedRain,[],1);
+rainMAX=max(RankedRain,[],1);
+<span class="comment">%Type "|help linspace|" in Command Window to find out more.</span>
+x=linspace(rainMIN,rainMAX,50)';
+<span class="comment">%Evaluate Normal CDF</span>
+u=(mu-x)/sigma/sqrt(2);
+Pnormal=erfc(u)/2;
+
+<span class="comment">%Plot results alongside empirical CDF</span>
+figure(2)
+clf
+<span class="comment">%Plot data as x-y scatter</span>
+plot(RankedRain,P,<span class="string">'.'</span>,x,Pnormal)
+xlabel(<span class="string">'Annual mean rainfall (mm/month)'</span>)
+ylabel(<span class="string">'Probability of non-exceedance'</span>)
+title(<span class="string">'Rainfall in Durham from 1880 to 2012'</span>)
+legend(<span class="string">'Empirical'</span>,<span class="string">'Theoretical'</span>)
+</pre><img vspace="5" hspace="5" src="MATLABsession3_02.png" alt=""> <h2>Application of subfunctions<a name="15"></a></h2><p>Code can become much more organised and ultimately shorter when one seeks to reduce a programme into a sequence of subfunctions.</p><p>For example paste the following code into a new script and save and run in the directory, MATLABnotes</p><pre class="language-matlab"><span class="keyword">function</span> SomeAlgebra
+<span class="comment">%Generate a set of 20 equally spaced points from 0 to 10</span>
+x=linspace(0,10,20)';
+<span class="comment">%Define parameter values</span>
+a=5;
+b=10;
+c=0.5;
+<span class="comment">%Apply both formulae to get y and z</span>
+y=b*sin(c*x)+a;
+z=y./x;
+<span class="comment">%Plot results</span>
+figure(1)
+clf
+plot(x,y,x,z)
+</pre><p>Now replace the code with the two functions below and run.</p><pre class="language-matlab"><span class="keyword">function</span> SomeAlgebra
+<span class="comment">%Generate a set of 20 equally spaced points from 0 to 10</span>
+x=linspace(0,10,20)';
+<span class="comment">%Define parameter values</span>
+a=5;
+b=10;
+c=0.5;
+[y,z]=MySubFun(x,a,b,c);
+<span class="comment">%Plot results</span>
+figure(1)
+clf
+plot(x,y,x,z)
+</pre><pre class="language-matlab"><span class="comment">%**************************************************************************</span>
+</pre><pre class="language-matlab"><span class="keyword">function</span> [y,z]=MySubFun(x,a,b,c)
+<span class="comment">%Apply both formulae to get y and z</span>
+y=b*sin(c*x)+a;
+z=y./x;
+</pre><p>Note that exactly the same result has been achieved. What we have done is partitioned part of the code into a piece of code underneath called a subfunction. The subfunction has input arguments, denoted in the (), and output arguments denoted in the []. The code within the subfunction only knows about the data given as input arguments. The code that accesses the subfunction only knows about the information given in the output arguments.</p><p>An important fact is that the names of input and output arguments in the subfunction do not need to be the same as those corresponding arguments being used in the the function accessing the subfunction. For example the following code will perform exactly the same task as above.</p><pre class="language-matlab"><span class="keyword">function</span> SomeAlgebra
+<span class="comment">%Generate a set of 20 equally spaced points from 0 to 10</span>
+x=linspace(0,10,20)';
+<span class="comment">%Define parameter values</span>
+a=5;
+b=10;
+c=0.5;
+[y,z]=MySubFun(x,a,b,c);
+<span class="comment">%Plot results</span>
+figure(1)
+clf
+plot(x,y,x,z)
+</pre><pre class="language-matlab"><span class="comment">%**************************************************************************</span>
+</pre><pre class="language-matlab"><span class="keyword">function</span> [y1,z1]=MySubFun(x1,a1,b1,c1)
+<span class="comment">%Apply both formulae to get y1 and z1</span>
+y1=b1*sin(c1*x1)+a1;
+z1=y1./x1;
+</pre><p>So in the subfunction the input arguments are called x1, a1, b1 and c1 but in the function accessing the subfunction, the names are different: x, a, b, c. The key thing is for the arguments to be in the correct order.</p><p>Now consider a slightly briefer version of MATLABsession3_Assignment.m</p><pre class="language-matlab"><span class="keyword">function</span> MATLABsession3_Assignment
+<span class="comment">%Import Durham weather data from excel</span>
+data=readmatrix(<span class="string">'DurhamWeather.xlsx'</span>,<span class="string">'Sheet'</span>,<span class="string">'Sheet1'</span>);
+<span class="comment">%Extract years and store in yyyy</span>
+yyyy=data(:,1);
+<span class="comment">%Extract months and store in mm</span>
+mm=data(:,2);
+<span class="comment">%Extract monthly rainfall and store in rain</span>
+rain=data(:,6);
+<span class="comment">%Generate a column vector of the years of interest</span>
+YEAR=[1880:2011]';
+<span class="comment">%Count how many years we are interested in and store in M</span>
+M=numel(YEAR);
+<span class="comment">%Perform a loop for each year of interest</span>
+<span class="keyword">for</span> i=1:M
+    <span class="comment">%Obtain the locations of all yyyy which are equal to the ith YEAR</span>
+    condition=yyyy==YEAR(i,1);
+    ind=find(condition);
+    <span class="comment">%Store all rain data for year of interest in rainYEAR</span>
+    rainYEAR=rain(ind,1);
+    <span class="comment">%Calculate annual mean rainfall for that year</span>
+    <span class="comment">%and store as the ith value of rainANNUAL</span>
+    rainANNUAL(i,1)=mean(rainYEAR,1);
+<span class="keyword">end</span>
+<span class="comment">%Rank the rain from smallest to largest</span>
+RankedRain=sort(rainANNUAL,1);
+<span class="comment">%Count the number of data points</span>
+M=numel(RankedRain);
+<span class="comment">%Generate the rank numbers (i.e., numbers from 1 to M in increments of 1)</span>
+m=[1:M]';
+<span class="comment">%Calculate probability of non-exceedance using Weibull plotting position</span>
+P=m/(M+1);
+figure(1)
+clf
+<span class="comment">%Plot data as x-y scatter</span>
+plot(RankedRain,P,<span class="string">'.'</span>)
+xlabel(<span class="string">'Annual mean rainfall (mm/month)'</span>)
+ylabel(<span class="string">'Probability of non-exceedance'</span>)
+title(<span class="string">'Rainfall in Durham from 1880 to 2012'</span>)
+</pre><p>Lets put some of the analysis into a subfunction:</p><pre class="language-matlab"><span class="keyword">function</span> MATLABsession3_Assignment
+<span class="comment">%Import Durham weather data from excel</span>
+data=readmatrix(<span class="string">'DurhamWeather.xlsx'</span>,<span class="string">'Sheet'</span>,<span class="string">'Sheet1'</span>);
+<span class="comment">%Extract years and store in yyyy</span>
+yyyy=data(:,1);
+<span class="comment">%Extract months and store in mm</span>
+mm=data(:,2);
+<span class="comment">%Extract monthly rainfall and store in rain</span>
+rain=data(:,6);
+<span class="comment">%Generate a column vector of the years of interest</span>
+YEAR=[1880:2011]';
+<span class="comment">%Apply sub function to get CDF for annual mean monthly rainfall</span>
+[RankedRain,P]=GetCDF(YEAR,yyyy,rain);
+figure(1)
+clf
+<span class="comment">%Plot data as x-y scatter</span>
+plot(RankedRain,P,<span class="string">'.'</span>)
+xlabel(<span class="string">'Annual mean rainfall (mm/month)'</span>)
+ylabel(<span class="string">'Probability of non-exceedance'</span>)
+title(<span class="string">'Rainfall in Durham from 1880 to 2012'</span>)
+</pre><pre class="language-matlab"><span class="comment">%**************************************************************************</span>
+</pre><pre class="language-matlab"><span class="keyword">function</span> [RankedRain,P]=GetCDF(YEAR,yyyy,rain)
+<span class="comment">%Count how many years we are interested in and store in M</span>
+M=numel(YEAR);
+<span class="comment">%Perform a loop for each year of interest</span>
+<span class="keyword">for</span> i=1:M
+    <span class="comment">%Obtain the locations of all yyyy which are equal to the ith YEAR</span>
+    condition=yyyy==YEAR(i,1);
+    ind=find(condition);
+    <span class="comment">%Store all rain data for year of interest in rainYEAR</span>
+    rainYEAR=rain(ind,1);
+    <span class="comment">%Calculate annual mean rainfall for that year</span>
+    <span class="comment">%and store as the ith value of rainANNUAL</span>
+    rainANNUAL(i,1)=mean(rainYEAR,1);
+<span class="keyword">end</span>
+<span class="comment">%Rank the rain from smallest to largest</span>
+RankedRain=sort(rainANNUAL,1);
+<span class="comment">%Count the number of data points</span>
+M=numel(RankedRain);
+<span class="comment">%Generate the rank numbers (i.e., numbers from 1 to M in increments of 1)</span>
+m=[1:M]';
+<span class="comment">%Calculate probability of non-exceedance using Weibull plotting position</span>
+P=m/(M+1);
+</pre><p>The major advantage of this is that now we can apply the same analysis to the temperature as well. For example:</p><pre class="language-matlab"><span class="keyword">function</span> MATLABsession3_Assignment
+<span class="comment">%Import Durham weather data from excel</span>
+data=readmatrix(<span class="string">'DurhamWeather.xlsx'</span>,<span class="string">'Sheet'</span>,<span class="string">'Sheet1'</span>);
+<span class="comment">%Extract years and store in yyyy</span>
+yyyy=data(:,1);
+<span class="comment">%Extract months and store in mm</span>
+mm=data(:,2);
+<span class="comment">%Extract monthly rainfall and store in rain</span>
+rain=data(:,6);
+<span class="comment">%Extract monthly mean daily maximum temperature (deg C) and store in tmax</span>
+tmax=data(:,3);
+<span class="comment">%Generate a column vector of the years of interest</span>
+YEAR=[1880:2011]';
+<span class="comment">%Apply sub function to get CDF for annual mean monthly rainfall</span>
+[RankedRain,P]=GetCDF(YEAR,yyyy,rain);
+<span class="comment">%Apply sub function to get CDF for annual mean daily max temperature</span>
+[RankedTmax,P]=GetCDF(YEAR,yyyy,tmax);
+figure(1)
+clf
+subplot(1,2,1)
+<span class="comment">%Plot data as x-y scatter</span>
+plot(RankedRain,P,<span class="string">'.'</span>)
+xlabel(<span class="string">'Annual mean rainfall (mm/month)'</span>)
+ylabel(<span class="string">'Probability of non-exceedance'</span>)
+title(<span class="string">'Rainfall in Durham from 1880 to 2012'</span>)
+subplot(1,2,2)
+plot(RankedTmax,P,<span class="string">'.'</span>)
+xlabel(<span class="string">'Annual mean daily max temp (^oC)'</span>)
+ylabel(<span class="string">'Probability of non-exceedance'</span>)
+title(<span class="string">'Temperature in Durham from 1880 to 2012'</span>)
+</pre><pre class="language-matlab"><span class="comment">%**************************************************************************</span>
+</pre><pre class="language-matlab"><span class="keyword">function</span> [RankedRain,P]=GetCDF(YEAR,yyyy,rain)
+<span class="comment">%Count how many years we are interested in and store in M</span>
+M=numel(YEAR);
+<span class="comment">%Perform a loop for each year of interest</span>
+<span class="keyword">for</span> i=1:M
+    <span class="comment">%Obtain the locations of all yyyy which are equal to the ith YEAR</span>
+    condition=yyyy==YEAR(i,1);
+    ind=find(condition);
+    <span class="comment">%Store all rain data for year of interest in rainYEAR</span>
+    rainYEAR=rain(ind,1);
+    <span class="comment">%Calculate annual mean rainfall for that year</span>
+    <span class="comment">%and store as the ith value of rainANNUAL</span>
+    rainANNUAL(i,1)=mean(rainYEAR,1);
+<span class="keyword">end</span>
+<span class="comment">%Rank the rain from smallest to largest</span>
+RankedRain=sort(rainANNUAL,1);
+<span class="comment">%Count the number of data points</span>
+M=numel(RankedRain);
+<span class="comment">%Generate the rank numbers (i.e., numbers from 1 to M in increments of 1)</span>
+m=[1:M]';
+<span class="comment">%Calculate probability of non-exceedance using Weibull plotting position</span>
+P=m/(M+1);
+</pre><p>Note how we are able to use GetCDF to look at tmax without having to change the variable names in the subfunction in GetCDF. Also we have used another new command called "|subplot|". Type "|help subplot|" to find more.</p><h2>Classroom assignment<a name="16"></a></h2><p>Extend MATLABsession3_Assignment.m further to plot the theoretical normal CDF for both the annual mean monthly rainfall and the annual mean daily maximum temperature using an additional subfunction.</p><p>An example MATLAB code, containing all of the instructions requested above, is given in <a href="https://samathiasuk.github.io/MATLABnotes/MATLABsession3_Assignment.m">MATLABsession3_Assignment.m</a>.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% MATLAB Notes: Session 3 - Using subfunctions
+%
+% Simon Mathias
+%
+% Department of Engineering
+%
+% Durham University
+%
+% <https://samathiasuk.github.io/MATLABnotes/html/MATLABcontents.html Return to main contents page>
+%
+%% Learning outcomes
+%
+% At the end of the session you should be able to:
+%
+% * Construct and interpret a cumulative distribution plot.
+% * Rank data using sort.
+% * Organise a script file using subfunctions.
+% * Save and load data in mat files.
+%
+%% Cumulative distribution functions
+%
+% In the last two weeks we have been learning how to import and
+% manipulate data from excel spreadsheets. We have also applied some basic 
+% statistical procedures. This week we will develop our code further to develop a
+% a probabilistic analysis of the Durham weather dataset. In this way, 
+% we will be applying similar techniques to different variables of interest.
+% Application of subfunctions will make the task much easier. 
+%
+% But first, we will introduce some basic probability theory:
+%
+% Consider a set of 5 measurements of a given variable, xn
+ 
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% n     xn
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% 1     35
+% 2     27
+% 3     30
+% 4     10
+% 5     25
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+ 
+%%
+% If we rank these from small to large we get:
+ 
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% m     xm
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% 1     10
+% 2     25
+% 3     27
+% 4     30
+% 5     35
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+ 
+%%
+% The probability of not exceeding a value, xm, in the future, P, can be
+% estimated from the so-called Weibull plotting position:
+%
+% P = m / (N+1)
+%
+% where m is the associated rank number of the value, xm, and N is the
+% number of values of x that have been previously observed.
+%
+% For the table above we can therefore say:
+% 
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% m     xm      P
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% 1     10      1/6 = 0.17
+% 2     25      2/6 = 0.33
+% 3     27      3/6 = 0.50
+% 4     30      4/6 = 0.67
+% 5     35      5/6 = 0.83
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+ 
+%%
+% Note that the need to add 1 to N is a way of avoiding the idea that it is
+% impossible to exceed the largest value that has been previously observed.
+%
+% The above table represents a discrete set of points from the so-called
+% cumulative distribution function (CDF) of the data.
+%
+% Open MATLAB.
+%
+% Click on "File", "New", "Script". The "Editor" window should now appear.
+% Save the file as "MATLABsession3_Assignment.m" in the your "MATLABnotes"
+% directory.
+%
+% At the top of the window paste the following code. 
+ 
+function MATLABsession3_Assignment
+%Import Durham weather data from excel
+data=readmatrix('DurhamWeather.xlsx','Sheet','Sheet1');
+%Extract years and store in yyyy
+yyyy=data(:,1);
+%Extract months and store in mm
+mm=data(:,2);
+%Extract monthly rainfall and store in rain
+rain=data(:,6);
+%Generate a column vector of the years of interest
+YEAR=[1880:2011]';
+%Count how many years we are interested in and store in M
+M=numel(YEAR);
+%Perform a loop for each year of interest
+for i=1:M
+    %Obtain the locations of all yyyy which are equal to the ith YEAR
+    condition=yyyy==YEAR(i,1);
+    ind=find(condition);
+    %Store all rain data for year of interest in rainYEAR
+    rainYEAR=rain(ind,1);
+    %Calculate annual mean rainfall for that year 
+    %and store as the ith value of rainANNUAL
+    rainANNUAL(i,1)=mean(rainYEAR,1);
+end
+%Check which variables are available in the workspace
+whos
+
+%%
+% Run the file by pressing the green arrow at the top of the editor window.
+%
+% Similar to in the previous session, we have imported the Durham monthly 
+% rainfall time-series but this time generated a corresponding sequence of 
+% annual mean rainfall time-series.
+%
+% Now type |whos| in the command window. You will notice that the
+% variables, previously listed following the specification of |whos| in our
+% MATLAB code, no longer exist in the workspace. This is because we have 
+% started our MATLAB code with the line
+%
+%   function MATLABsession3_Assignment
+%
+% Whenever you start an mfile with a function heading like that, it transforms
+% the mfile into a function.
+%
+% Normally a function heading looks something like
+%
+%   function [y1,y2,y3]=MyFunctionName(x1,x2,x3,x4)
+%
+% where |MyFunctionName| is the name of the function, |x1,x2,x3,x4| are input
+% variables for the function and |y1,y2,y3| are output
+% variables from the function. You can have as many input and output
+% variables as you like.
+%
+% By stating
+%
+%   function MATLABsession3_Assignment
+%
+% we are saying that the name of the function is
+% |MATLABsession3_Assignment| and that there are no input or output
+% variables. The reason that there are no variables in our workspace,
+% following execution of |MATLABsession3_Assignment|, is that no output
+% variables in the function heading are declared.
+%
+% It is useful to state |function MATLABsession3_Assignment| at
+% the beginning of our MATLAB code because it will enable us to
+% subsequently use subfunctions, which is the main subject of this session.
+
+
+%% Saving and loading data in MAT files
+%
+% Now add the following to our mfile:
+ 
+%Save all the generated data in a MAT file
+save('AnnualData.mat')
+ 
+%Load the generated data stored in the MAT file
+load('AnnualData.mat')
+
+%Check which variables are available in the workspace
+whos
+ 
+%%
+% We have saved everything generated prior to the line "|save('AnnualData.mat')|" in
+% a file called |AnnualData.mat|. Now comment everything from the line
+% starting with "|data=readmatrix(|..." down to "|save('AnnualData.mat')|". This can be
+% done by highlighting all the code of concern, rightclicking and choosing
+% "comment". All the text highlighted should now be preceeded with a % sign
+% on each line and should be colored green. Now run.
+%
+% Note that "whos" verifies 
+% that we are able access all the data in |AnnualData.mat| 
+% % due the line "|load(AnnualData.mat)|". 
+% The neat thing about this is that loading the data in this way is much 
+% faster than regenerating the data from scratch each time.
+%
+%% Ranking data using sort
+%
+% To generate the CDF for the annual mean rain data we first need to rank the data.
+% The recommended MATLAB command for this purpose is |sort|. Type "|help sort|"
+% in the Command Window to find out more.
+%
+% The command, |sort|, can be used to rank the data in either 
+% the columns or rows of a 2D array.
+%
+% Type the following in the Command Window
+ 
+A=[2 5 8 6; 9 4 3 1; 7 12 10 11]
+sort(A,1)
+ 
+%%
+% Applying |sort(A,1)| has ranked all the columns in A from smallest to
+% largest. Now try
+ 
+sort(A,2)
+ 
+%%
+% We have now ranked all the rows from smallest to largest
+%
+% To generate and plot the CDF for Durham's annual rainfall paste the
+% following additional code into "MATLABsession3_Assignment.m":
+ 
+%Rank the rain from smallest to largest
+RankedRain=sort(rainANNUAL,1);
+%Count the number of data points
+M=numel(RankedRain);
+%Generate the rank numbers (i.e., numbers from 1 to M in increments of 1)
+m=[1:M]';
+%Calculate probability of non-exceedance using Weibull plotting position
+P=m/(M+1);
+ 
+figure(1)
+clf
+%Plot data as x-y scatter
+plot(RankedRain,P,'.')
+%Note that typing in '.' cause the results to be plotted as dots.
+xlabel('Annual mean rainfall (mm/month)')
+ylabel('Probability of non-exceedance')
+title('Rainfall in Durham from 1880 to 2012')
+ 
+%% Comparison with the normal distribution
+%
+% Most of you will be familiar with calculating the mean, $\mu$, of 
+% data. Many of you will also be familiar with the so-called standard 
+% deviation, $\sigma$. The significance of these variables is best 
+% understood in the context of the normal distribution probability density
+% function:
+%
+% $$ \displaystyle f(x)=\frac{1}{\sigma \sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)} $$
+%
+% The associated cumulative distribution function is obtained from
+%
+% $$ \displaystyle P(x) = \int_{-\infty}^x f(\xi) d\xi = \frac{1}{2}\mathrm{erfc}\left(\frac{\mu-x}{\sigma\sqrt 2}\right) $$
+%
+% where erfc denotes the so-called complementary error function. This, of
+% course is already available in MATLAB. Type "|help erfc|" in the Command
+% Window and find out more.
+%
+% It is often interesting to compare an empirical cdf (as we have previously
+% obtained from our rainfall data) with a theoretical normal cdf. Add the
+% following code to "MATLABsession3_Assignment.m"
+ 
+%Calculate mean
+mu=mean(RankedRain,1);
+%Calculate a standard deviation
+sigma=std(RankedRain,[],1);
+ 
+%Generate a set of 50 equally spaced points from the min to the max
+rainMIN=min(RankedRain,[],1);
+rainMAX=max(RankedRain,[],1);
+%Type "|help linspace|" in Command Window to find out more.
+x=linspace(rainMIN,rainMAX,50)';
+%Evaluate Normal CDF
+u=(mu-x)/sigma/sqrt(2);
+Pnormal=erfc(u)/2;
+
+%Plot results alongside empirical CDF
+figure(2)
+clf
+%Plot data as x-y scatter
+plot(RankedRain,P,'.',x,Pnormal)
+xlabel('Annual mean rainfall (mm/month)')
+ylabel('Probability of non-exceedance')
+title('Rainfall in Durham from 1880 to 2012')
+legend('Empirical','Theoretical')
+ 
+%% Application of subfunctions
+%
+% Code can become much more organised and ultimately shorter when one seeks
+% to reduce a programme into a sequence of subfunctions.
+%
+% For example paste the following code into a new script and save and run
+% in the directory, MATLABnotes
+%
+%   function SomeAlgebra
+%   %Generate a set of 20 equally spaced points from 0 to 10
+%   x=linspace(0,10,20)';
+%   %Define parameter values
+%   a=5;
+%   b=10;
+%   c=0.5;
+%   %Apply both formulae to get y and z
+%   y=b*sin(c*x)+a;
+%   z=y./x;
+%   %Plot results
+%   figure(1)
+%   clf
+%   plot(x,y,x,z)
+%
+% Now replace the code with the two functions below and run.
+%
+%   function SomeAlgebra
+%   %Generate a set of 20 equally spaced points from 0 to 10
+%   x=linspace(0,10,20)';
+%   %Define parameter values
+%   a=5;
+%   b=10;
+%   c=0.5;
+%   [y,z]=MySubFun(x,a,b,c);
+%   %Plot results
+%   figure(1)
+%   clf
+%   plot(x,y,x,z)
+%   
+%   %**************************************************************************
+%   
+%   function [y,z]=MySubFun(x,a,b,c)
+%   %Apply both formulae to get y and z
+%   y=b*sin(c*x)+a;
+%   z=y./x;
+%
+% Note that exactly the same result has been achieved.
+% What we have done is partitioned part of the code into a piece of code
+% underneath called a subfunction. The subfunction has input arguments,
+% denoted in the (), and output arguments denoted in the []. The code within the
+% subfunction only knows about the data given as input arguments. The code
+% that accesses the subfunction only knows about the information given in
+% the output arguments.
+%
+% An important fact is that the names of input and output arguments in the 
+% subfunction do not need to be the same as those corresponding arguments 
+% being used in the the function accessing the subfunction.
+% For example the following code will perform exactly the same task as
+% above.
+%
+%   function SomeAlgebra
+%   %Generate a set of 20 equally spaced points from 0 to 10
+%   x=linspace(0,10,20)';
+%   %Define parameter values
+%   a=5;
+%   b=10;
+%   c=0.5;
+%   [y,z]=MySubFun(x,a,b,c);
+%   %Plot results
+%   figure(1)
+%   clf
+%   plot(x,y,x,z)
+%   
+%   %**************************************************************************
+%   
+%   function [y1,z1]=MySubFun(x1,a1,b1,c1)
+%   %Apply both formulae to get y1 and z1
+%   y1=b1*sin(c1*x1)+a1;
+%   z1=y1./x1;
+%
+% So in the subfunction the input arguments are called x1, a1, b1 and c1
+% but in the function accessing the subfunction, the names are different:
+% x, a, b, c. The key thing is for the arguments to be in the correct order.
+%
+% Now consider a slightly briefer version of MATLABsession3_Assignment.m
+%
+%   function MATLABsession3_Assignment
+%   %Import Durham weather data from excel
+%   data=readmatrix('DurhamWeather.xlsx','Sheet','Sheet1');
+%   %Extract years and store in yyyy
+%   yyyy=data(:,1);
+%   %Extract months and store in mm
+%   mm=data(:,2);
+%   %Extract monthly rainfall and store in rain
+%   rain=data(:,6);
+%   %Generate a column vector of the years of interest
+%   YEAR=[1880:2011]';
+%   %Count how many years we are interested in and store in M
+%   M=numel(YEAR);
+%   %Perform a loop for each year of interest
+%   for i=1:M
+%       %Obtain the locations of all yyyy which are equal to the ith YEAR
+%       condition=yyyy==YEAR(i,1);
+%       ind=find(condition);
+%       %Store all rain data for year of interest in rainYEAR
+%       rainYEAR=rain(ind,1);
+%       %Calculate annual mean rainfall for that year 
+%       %and store as the ith value of rainANNUAL
+%       rainANNUAL(i,1)=mean(rainYEAR,1);
+%   end
+%   %Rank the rain from smallest to largest
+%   RankedRain=sort(rainANNUAL,1);
+%   %Count the number of data points
+%   M=numel(RankedRain);
+%   %Generate the rank numbers (i.e., numbers from 1 to M in increments of 1)
+%   m=[1:M]';
+%   %Calculate probability of non-exceedance using Weibull plotting position
+%   P=m/(M+1); 
+%   figure(1)
+%   clf
+%   %Plot data as x-y scatter
+%   plot(RankedRain,P,'.')
+%   xlabel('Annual mean rainfall (mm/month)')
+%   ylabel('Probability of non-exceedance')
+%   title('Rainfall in Durham from 1880 to 2012')
+%
+%
+% Lets put some of the analysis into a subfunction:
+%
+%   function MATLABsession3_Assignment
+%   %Import Durham weather data from excel
+%   data=readmatrix('DurhamWeather.xlsx','Sheet','Sheet1');
+%   %Extract years and store in yyyy
+%   yyyy=data(:,1);
+%   %Extract months and store in mm
+%   mm=data(:,2);
+%   %Extract monthly rainfall and store in rain
+%   rain=data(:,6);
+%   %Generate a column vector of the years of interest
+%   YEAR=[1880:2011]';
+%   %Apply sub function to get CDF for annual mean monthly rainfall
+%   [RankedRain,P]=GetCDF(YEAR,yyyy,rain);
+%   figure(1)
+%   clf
+%   %Plot data as x-y scatter
+%   plot(RankedRain,P,'.')
+%   xlabel('Annual mean rainfall (mm/month)')
+%   ylabel('Probability of non-exceedance')
+%   title('Rainfall in Durham from 1880 to 2012')
+%   
+%   %**************************************************************************
+%   
+%   function [RankedRain,P]=GetCDF(YEAR,yyyy,rain)
+%   %Count how many years we are interested in and store in M
+%   M=numel(YEAR);
+%   %Perform a loop for each year of interest
+%   for i=1:M
+%       %Obtain the locations of all yyyy which are equal to the ith YEAR
+%       condition=yyyy==YEAR(i,1);
+%       ind=find(condition);
+%       %Store all rain data for year of interest in rainYEAR
+%       rainYEAR=rain(ind,1);
+%       %Calculate annual mean rainfall for that year 
+%       %and store as the ith value of rainANNUAL
+%       rainANNUAL(i,1)=mean(rainYEAR,1);
+%   end
+%   %Rank the rain from smallest to largest
+%   RankedRain=sort(rainANNUAL,1);
+%   %Count the number of data points
+%   M=numel(RankedRain);
+%   %Generate the rank numbers (i.e., numbers from 1 to M in increments of 1)
+%   m=[1:M]';
+%   %Calculate probability of non-exceedance using Weibull plotting position
+%   P=m/(M+1); 
+%
+% The major advantage of this is that now we can apply the same analysis 
+% to the temperature as well. For example:
+%
+%   function MATLABsession3_Assignment
+%   %Import Durham weather data from excel
+%   data=readmatrix('DurhamWeather.xlsx','Sheet','Sheet1');
+%   %Extract years and store in yyyy
+%   yyyy=data(:,1);
+%   %Extract months and store in mm
+%   mm=data(:,2);
+%   %Extract monthly rainfall and store in rain
+%   rain=data(:,6);
+%   %Extract monthly mean daily maximum temperature (deg C) and store in tmax
+%   tmax=data(:,3);
+%   %Generate a column vector of the years of interest
+%   YEAR=[1880:2011]';
+%   %Apply sub function to get CDF for annual mean monthly rainfall
+%   [RankedRain,P]=GetCDF(YEAR,yyyy,rain);
+%   %Apply sub function to get CDF for annual mean daily max temperature
+%   [RankedTmax,P]=GetCDF(YEAR,yyyy,tmax);
+%   figure(1)
+%   clf
+%   subplot(1,2,1)
+%   %Plot data as x-y scatter
+%   plot(RankedRain,P,'.')
+%   xlabel('Annual mean rainfall (mm/month)')
+%   ylabel('Probability of non-exceedance')
+%   title('Rainfall in Durham from 1880 to 2012')
+%   subplot(1,2,2)
+%   plot(RankedTmax,P,'.')
+%   xlabel('Annual mean daily max temp (^oC)')
+%   ylabel('Probability of non-exceedance')
+%   title('Temperature in Durham from 1880 to 2012')
+%   
+%   %**************************************************************************
+%   
+%   function [RankedRain,P]=GetCDF(YEAR,yyyy,rain)
+%   %Count how many years we are interested in and store in M
+%   M=numel(YEAR);
+%   %Perform a loop for each year of interest
+%   for i=1:M
+%       %Obtain the locations of all yyyy which are equal to the ith YEAR
+%       condition=yyyy==YEAR(i,1);
+%       ind=find(condition);
+%       %Store all rain data for year of interest in rainYEAR
+%       rainYEAR=rain(ind,1);
+%       %Calculate annual mean rainfall for that year 
+%       %and store as the ith value of rainANNUAL
+%       rainANNUAL(i,1)=mean(rainYEAR,1);
+%   end
+%   %Rank the rain from smallest to largest
+%   RankedRain=sort(rainANNUAL,1);
+%   %Count the number of data points
+%   M=numel(RankedRain);
+%   %Generate the rank numbers (i.e., numbers from 1 to M in increments of 1)
+%   m=[1:M]';
+%   %Calculate probability of non-exceedance using Weibull plotting position
+%   P=m/(M+1); 
+%
+% Note how we are able to use GetCDF to look at tmax without having to
+% change the variable names in the subfunction in GetCDF. Also we have used
+% another new command called "|subplot|". Type "|help subplot|" to find more.
+%
+%% Classroom assignment
+%
+% Extend MATLABsession3_Assignment.m further to plot the theoretical normal
+% CDF for both the annual mean monthly rainfall and the annual mean daily 
+% maximum temperature using an additional subfunction.
+%
+% An example MATLAB code, containing all of the instructions requested
+% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession3_Assignment.m MATLABsession3_Assignment.m>.
+##### SOURCE END #####
+--></body></html>

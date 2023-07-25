@@ -1,0 +1,468 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MATLAB Notes: Session 5 - MATLAB's ODE solvers</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-07-25"><meta name="DC.source" content="MATLABsession5.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>MATLAB Notes: Session 5 - MATLAB's ODE solvers</h1><!--introduction--><p>Simon Mathias</p><p>Department of Engineering</p><p>Durham University</p><p><a href="https://samathiasuk.github.io/MATLABnotes/html/MATLABcontents.html">Return to main contents page</a></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Learning outcomes</a></li><li><a href="#2">Decay of Caesium-137 in a disposal lagoon</a></li><li><a href="#3">Solution by first-order explicit time-stepping</a></li><li><a href="#4">Re-casting the problem in terms of an ODE function</a></li><li><a href="#5">Introducing the concept of an ODE solver</a></li><li><a href="#6">Application of MATLAB's ODE45</a></li></ul></div><h2>Learning outcomes<a name="1"></a></h2><p>At the end of the session you should be able to:</p><div><ul><li>Solve an ordinary differential equation using first-order explicit time -stepping.</li><li>Re-cast the concept of first-order explicit time-stepping in terms of an ODE function.</li><li>Describe how <tt>ode45</tt> works.</li><li>Solve an ordinary differntial equation using <tt>ode45</tt>.</li></ul></div><h2>Decay of Caesium-137 in a disposal lagoon<a name="2"></a></h2><p>Consider a disposal lagoon containing water contaminated with Caesium-137. The half-life of Caesium-137 is about 30 years. The initial concentration of the Caesium in the lagoon water is 20 (ppb).</p><p>The rate of decay is described by following linear ordinary differential equation (ODE)</p><p><span class="MathJax_Preview"><img src="MATLABsession5_eq05567465334677227868.png" alt="$$ \displaystyle \frac{dC}{dt}=-\lambda C $$"></span><script type="math/tex"> \displaystyle \frac{dC}{dt}=-\lambda C </script></p><p>where <span class="MathJax_Preview"><img src="MATLABsession5_eq08596374860807106346.png" alt="$C$"></span><script type="math/tex">C</script> <span class="MathJax_Preview"><img src="MATLABsession5_eq03717337757153475401.png" alt="$[\mathrm{ML}^{-3}]$"></span><script type="math/tex">[\mathrm{ML}^{-3}]</script> is the Caesium-137 solute concentration, <span class="MathJax_Preview"><img src="MATLABsession5_eq10146963226942718528.png" alt="$t$"></span><script type="math/tex">t</script> <span class="MathJax_Preview"><img src="MATLABsession5_eq16979207896498719141.png" alt="$[\mathrm{T}]$"></span><script type="math/tex">[\mathrm{T}]</script> is time and <span class="MathJax_Preview"><img src="MATLABsession5_eq14606202617661871665.png" alt="$\lambda$"></span><script type="math/tex">\lambda</script> <span class="MathJax_Preview"><img src="MATLABsession5_eq11652493192825170227.png" alt="$[\mathrm{T}^{-1}]$"></span><script type="math/tex">[\mathrm{T}^{-1}]</script> is the decay rate, found from <span class="MathJax_Preview"><img src="MATLABsession5_eq10542557259555152132.png" alt="$\lambda=(\ln 2)/t_{1/2}$"></span><script type="math/tex">\lambda=(\ln 2)/t_{1/2}</script>, and <span class="MathJax_Preview"><img src="MATLABsession5_eq07106578830236716805.png" alt="$t_{1/2}$"></span><script type="math/tex">t_{1/2}</script> <span class="MathJax_Preview"><img src="MATLABsession5_eq16979207896498719141.png" alt="$[\mathrm{T}]$"></span><script type="math/tex">[\mathrm{T}]</script> denotes the half-life.</p><p>The associated initial condition takes the form <span class="MathJax_Preview"><img src="MATLABsession5_eq11490482489086646737.png" alt="$C(t=0)=C_0$"></span><script type="math/tex">C(t=0)=C_0</script> where <span class="MathJax_Preview"><img src="MATLABsession5_eq11490819935445825312.png" alt="$C_0$"></span><script type="math/tex">C_0</script> <span class="MathJax_Preview"><img src="MATLABsession5_eq03717337757153475401.png" alt="$[\mathrm{ML}^{-3}]$"></span><script type="math/tex">[\mathrm{ML}^{-3}]</script> is the initial solute concentration.</p><p>The following analytical solution to this problem can be obtained by separation of variables followed by direct integration:</p><p><span class="MathJax_Preview"><img src="MATLABsession5_eq09665832580680533431.png" alt="$$ C=C_0\exp(-\lambda t) $$"></span><script type="math/tex"> C=C_0\exp(-\lambda t) </script></p><p>In this exercise we will solve this problem using a first-order explicit time-stepping scheme and then using the MATLAB solver, <tt>ode45</tt>.</p><h2>Solution by first-order explicit time-stepping<a name="3"></a></h2><p>The simplest way to solve this problem is to use a first-order explicit time-stepping scheme.</p><p>First we will discrete the time, <span class="MathJax_Preview"><img src="MATLABsession5_eq10146963226942718528.png" alt="$t$"></span><script type="math/tex">t</script>, into a sequence of time-steps of interval <span class="MathJax_Preview"><img src="MATLABsession5_eq00791438275661894543.png" alt="$\Delta t$"></span><script type="math/tex">\Delta t</script>. Let <span class="MathJax_Preview"><img src="MATLABsession5_eq17665791817799970874.png" alt="$C_n$"></span><script type="math/tex">C_n</script> denote the concentration at time, <span class="MathJax_Preview"><img src="MATLABsession5_eq12196317474004655439.png" alt="$t_n$"></span><script type="math/tex">t_n</script>. A discrete approximation of the ODE above can be written as follows</p><p><span class="MathJax_Preview"><img src="MATLABsession5_eq08147583021845006147.png" alt="$$\displaystyle  \frac{C_{n+1}-C_{n}}{\Delta t}=-\lambda C_{n} $$"></span><script type="math/tex">\displaystyle  \frac{C_{n+1}-C_{n}}{\Delta t}=-\lambda C_{n} </script></p><p>which when solved for <span class="MathJax_Preview"><img src="MATLABsession5_eq06461960740989408652.png" alt="$C_{n+1}$"></span><script type="math/tex">C_{n+1}</script> takes the form</p><p><span class="MathJax_Preview"><img src="MATLABsession5_eq14035314831071425437.png" alt="$$ C_{n+1}=(1-\Delta t\lambda )C_{n} $$"></span><script type="math/tex"> C_{n+1}=(1-\Delta t\lambda )C_{n} </script></p><p>Create a new script-file and type the following to evaluate and compare the first-order explicit solution and the associated analytical solution:</p><pre class="language-matlab"><span class="keyword">function</span> MATLABsession5_Assignment
+<span class="comment">%Solves the decay equation analytically, using Euler explicit time-stepping</span>
+<span class="comment">%</span>
+<span class="comment">% tHalf (years) - Half life of Caesium-137</span>
+<span class="comment">% C0 (ppb) - Initial mass fraction of Caesium-137</span>
+<span class="comment">% lambda (1/years) - Decay coefficient</span>
+<span class="comment">% t (years) - Time</span>
+</pre><pre class="language-matlab"><span class="comment">%Define model parameters</span>
+tHalf=30;
+C0=20;
+<span class="comment">%Calculate decay coefficient</span>
+lambda=log(2)/tHalf;
+<span class="comment">%Define times of interest</span>
+t=linspace(0,100,20)';
+</pre><pre class="language-matlab"><span class="comment">%Solve using first-order explicit time-stepping</span>
+</pre><pre class="language-matlab"><span class="comment">%Define time-step</span>
+dt=t(2)-t(1);
+<span class="comment">%Initialize solution vector</span>
+C=zeros(size(t));
+<span class="comment">%Set the initial condition</span>
+C(1)=C0;
+<span class="comment">%Step through explicit time-stepping sequence</span>
+<span class="keyword">for</span> n=1:numel(t)-1;
+    C(n+1,1)=(1-dt*lambda)*C(n,1);
+<span class="keyword">end</span>
+</pre><pre class="language-matlab"><span class="comment">%Evaluate an analytical solution for comparison purposes</span>
+Ca=C0*exp(-lambda*t);
+</pre><pre class="language-matlab"><span class="comment">%Plot results</span>
+figure(1)
+plot(t,Ca,t,C,<span class="string">'o'</span>)
+xlabel(<span class="string">'Time (years)'</span>)
+ylabel(<span class="string">'Caesium-137 concentration (ppb)'</span>)
+legend(<span class="string">'Analytical'</span>,<span class="string">'First-order explicit'</span>)
+</pre><h2>Re-casting the problem in terms of an ODE function<a name="4"></a></h2><p>A more general way to think about the explicit time-stepping scheme is to consider that</p><p><span class="MathJax_Preview"><img src="MATLABsession5_eq01047494533882631252.png" alt="$$\displaystyle  C_{n}=\left.\frac{dC}{dt}\right|_{n}\Delta t+C_{n-1} $$"></span><script type="math/tex">\displaystyle  C_{n}=\left.\frac{dC}{dt}\right|_{n}\Delta t+C_{n-1} </script></p><p>where in this case</p><p><span class="MathJax_Preview"><img src="MATLABsession5_eq00039372713474611851.png" alt="$$\displaystyle  \left.\frac{dC}{dt}\right|_{n}=-\lambda C_n $$"></span><script type="math/tex">\displaystyle  \left.\frac{dC}{dt}\right|_{n}=-\lambda C_n </script></p><p>Modify your existing code to better  emphasise this idea.</p><p>This can be done by writing:</p><pre class="language-matlab"><span class="comment">%Step through explicit time-stepping sequence</span>
+<span class="keyword">for</span> n=1:numel(t)-1;
+    dCdt=-lambda*C(n,1);
+    C(n+1,1)=dCdt*dt+C(n,1);
+<span class="keyword">end</span>
+</pre><h2>Introducing the concept of an ODE solver<a name="5"></a></h2><p>Now we are going to modify the code such that the explicit time-stepping takes place in a subfunction called <tt>MYsolver</tt> and the ordinary differential equation is contained within a subfunction called <tt>MYodefun</tt>.</p><pre class="language-matlab"><span class="keyword">function</span> MATLABsession5_Assignment
+<span class="comment">%Solves the decay equation analytically, using Euler explicit</span>
+<span class="comment">%time-stepping.</span>
+</pre><pre class="language-matlab"><span class="comment">% tHalf (years) - Half life of Caesium-137</span>
+<span class="comment">% C0 (ppb) - Initial mass fraction of Caesium-137</span>
+<span class="comment">% lambda (1/years) - Decay coefficient</span>
+<span class="comment">% t (years) - Time</span>
+</pre><pre class="language-matlab"><span class="comment">%Define model parameters</span>
+tHalf=30;
+C0=20;
+</pre><pre class="language-matlab"><span class="comment">%Calculate decay coefficient</span>
+lambda=log(2)/tHalf;
+</pre><pre class="language-matlab"><span class="comment">%Define times of interest</span>
+t=linspace(0,100,20)';
+</pre><pre class="language-matlab"><span class="comment">%Solve using first-order explicit time-stepping</span>
+[t,C]=MYsolver(@MYodefun,t,C0,lambda);
+</pre><pre class="language-matlab"><span class="comment">%Evaluate an analytical solution for comparison purposes</span>
+Ca=C0*exp(-lambda*t);
+</pre><pre class="language-matlab"><span class="comment">%Plot results</span>
+figure(1)
+plot(t,Ca,t,C,<span class="string">'o'</span>)
+xlabel(<span class="string">'Time (years)'</span>)
+ylabel(<span class="string">'Caesium-137 concentration (ppb)'</span>)
+legend(<span class="string">'Analytical'</span>,<span class="string">'First-order explicit'</span>)
+</pre><pre class="language-matlab"><span class="comment">%**************************************************************************</span>
+</pre><pre class="language-matlab"><span class="keyword">function</span> dCdt=MYodefun(t,C,lambda)
+<span class="comment">%The first-order decay equation</span>
+dCdt=-lambda*C;
+</pre><pre class="language-matlab"><span class="comment">%**************************************************************************</span>
+</pre><pre class="language-matlab"><span class="keyword">function</span> [t,f]=MYsolver(odefun,t,f0,p1)
+<span class="comment">% odefun - contains the name of the subfunction containing the ODE function</span>
+<span class="comment">% t - a vector containing the times to be solved for.</span>
+<span class="comment">% f0 - initial condition of f</span>
+<span class="comment">% p1 - a parameter in the ODE</span>
+<span class="comment">% f - a vector containing the solution</span>
+</pre><pre class="language-matlab"><span class="comment">%Initialize solution vector</span>
+f=zeros(size(t));
+<span class="comment">%Set the initial condition</span>
+f(1)=f0;
+<span class="comment">%Step through explicit time-stepping sequence</span>
+<span class="keyword">for</span> n=1:numel(t)-1;
+    <span class="comment">%Obtain an estimate of the derivative using the ODE function</span>
+    dfdt=odefun(t(n,1),f(n,1),p1);
+    <span class="comment">%Define time-step</span>
+    dt=t(n+1)-t(n);
+    <span class="comment">%Evaluate y for the current time-step</span>
+    f(n+1,1)=dfdt*dt+f(n,1);
+<span class="keyword">end</span>
+</pre><p>The subfunction <tt>MYsolver</tt> is designed to solve an ODE, <tt>odefun</tt>, with initial condition, y0, by first-order explicit time-stepping. This command is useful if you do not already know the name of the function to be used. The function name is specified through function handle specified in <tt>odefun</tt>. All the subsequent parameters in the <tt>odefun</tt> input arguments are carried forward to the function specified by <tt>odefun</tt>, which in this case is <tt>MYodefun</tt>.</p><p>Note that in the main function the codes states that</p><pre class="language-matlab">[t,C]=MYsolver(@MYodefun,t,C0,lambda);
+</pre><p>Where it says <tt>@MYodefun</tt>, we are telling MYsolver that <tt>odefun=@MYodefun</tt>.</p><p>The implications are that when we state</p><pre class="language-matlab">dfdt=odefun(t(n,1),f(n,1),p1);
+</pre><p>MATLAB will interpret this as meaning</p><pre class="language-matlab">dfdt=MYodefun(t(n,1),f(n,1),p1);
+</pre><p>If instead we said <tt>odefun=@simon</tt>, then MATLAB would intepret this as leading to</p><pre class="language-matlab">dfdt=simon(t(n,1),f(n,1),p1);
+</pre><p>Read about the MATLAB help files about function handles to learn more about this.</p><p>With the code as stated, we can change which problem we are solving by applying a different ODE function. Similarly, we can change the way we are solving the differential equation by applying a different solver.</p><h2>Application of MATLAB's ODE45<a name="6"></a></h2><p>MATLAB has a number of different ODE solvers to choose from. <tt>ode45</tt> represents the first ODE solver one might consider using.</p><p>Consider the following Taylor expansion for a function, <span class="MathJax_Preview"><img src="MATLABsession5_eq06660474701105881698.png" alt="$$ f(t) $$"></span><script type="math/tex"> f(t) </script>:</p><p><span class="MathJax_Preview"><img src="MATLABsession5_eq08400701727436622114.png" alt="$$\displaystyle  f(t+\Delta t) = f(t) + \Delta t \frac{d f}{dt}+\frac{\Delta&#xA;t^2}{2!}\frac{d^2 f}{dt^2}+\frac{\Delta&#xA;t^3}{3!}\frac{d^3 f}{dt^3}+O(\Delta t^4) $$"></span><script type="math/tex">\displaystyle  f(t+\Delta t) = f(t) + \Delta t \frac{d f}{dt}+\frac{\Delta
+t^2}{2!}\frac{d^2 f}{dt^2}+\frac{\Delta
+t^3}{3!}\frac{d^3 f}{dt^3}+O(\Delta t^4) </script></p><p>Solving for <span class="MathJax_Preview"><img src="MATLABsession5_eq05313219815722444526.png" alt="$df/dt$"></span><script type="math/tex">df/dt</script> it can be seen that</p><p><span class="MathJax_Preview"><img src="MATLABsession5_eq10170362927709045578.png" alt="$$ \displaystyle \frac{df}{dt}=\frac{f(t+\Delta t) - f(t)}{\Delta t} + O(\Delta t) $$"></span><script type="math/tex"> \displaystyle \frac{df}{dt}=\frac{f(t+\Delta t) - f(t)}{\Delta t} + O(\Delta t) </script></p><p>which is the basic finite difference approximation for a derivative we used previously for our first-order time-stepping scheme.</p><p>From the Taylor series it is clear that the truncation error associated with this approximation is of the order of <span class="MathJax_Preview"><img src="MATLABsession5_eq00791438275661894543.png" alt="$\Delta t$"></span><script type="math/tex">\Delta t</script>. Consequently, this approximation is often referred to as being first-order accurate.</p><p>By manipulating the Taylor series it is possible derive increasingly more accurate approximations of the first-order derivative. There are many differnt methodologies to achieve this. A particularly popular method is the so-called Runge-Kutta method.</p><p>MATLAB's solver, <tt>ode45</tt>, has an adaptive time stepping routine. The solver repeats its calculations with successively smaller time-steps until the error between two results, generated using Runge-Kutta 4th (which is 4th order accurate) and Runge-Kutta 5th (which is 5th order accurate) methods, is below a pre-defined error tolerance; hence the name <tt>ode45</tt>. This process is illustrated further in the flowchart below.</p><p><img vspace="5" hspace="5" src="ODE45flowchart.png" alt=""> </p><p>The advantage of such an approach is that the solver is able to take much larger time-steps when not much activity is happening, whilst maintaing the same accuracy throughout the simulation. As a result, <tt>ode45</tt> is able to compute solutions much faster than conventional first-order explicit time-stepping schemes without compromising accuracy.</p><p>Read the help file about <tt>ode45</tt>. Now modify your <tt>MATLABsession5_Assignment</tt> script such that the decay problem, discussed earlier, is also solved using <tt>ode45</tt>.  This can be done by adding the following code:</p><pre class="language-matlab"><span class="comment">%Solve using ODE45</span>
+options=[];
+[t,Code45]=ode45(@MYodefun,t,C0,options,lambda);
+</pre><p>Note that in the above example we are not changing any of the available options associated with <tt>ode45</tt>. You can learn more about the options available by studying the help file for <tt>odeset</tt>.</p><p>Use a plot to compare your results with the first-order explicit solution and the analytical solution.</p><p>Also note that the <tt>t</tt> vector simply contains the time we require solution values at. The times in the <tt>t</tt> vector have nothing to do with the actual time-steps that are used. See what happens if you set</p><pre class="language-matlab">t=[0 50 100]';
+</pre><p>An example MATLAB code, containing all of the instructions requested above, is given in <a href="https://samathiasuk.github.io/MATLABnotes/MATLABsession5_Assignment.m">MATLABsession5_Assignment.m</a>.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% MATLAB Notes: Session 5 - MATLAB's ODE solvers
+%
+% Simon Mathias
+%
+% Department of Engineering
+%
+% Durham University
+%
+% <https://samathiasuk.github.io/MATLABnotes/html/MATLABcontents.html Return to main contents page>
+%
+%% Learning outcomes
+%
+% At the end of the session you should be able to:
+%
+% * Solve an ordinary differential equation using first-order explicit time
+% -stepping.
+% * Re-cast the concept of first-order explicit time-stepping in terms of an ODE
+% function.
+% * Describe how |ode45| works.
+% * Solve an ordinary differntial equation using |ode45|.
+%
+%% Decay of Caesium-137 in a disposal lagoon
+%
+% Consider a disposal lagoon containing water contaminated with
+% Caesium-137. The half-life of Caesium-137 is about 30 years. The initial 
+% concentration of the Caesium in the lagoon water is 20 (ppb).
+%
+% The rate of decay is described by following linear ordinary differential
+% equation (ODE)
+%
+% $$ \displaystyle \frac{dC}{dt}=-\lambda C $$
+%
+% where $C$ $[\mathrm{ML}^{-3}]$ is the Caesium-137 solute concentration,
+% $t$ $[\mathrm{T}]$ is time and $\lambda$ $[\mathrm{T}^{-1}]$ is 
+% the decay rate, found from $\lambda=(\ln 2)/t_{1/2}$, and $t_{1/2}$ 
+% $[\mathrm{T}]$ denotes the half-life.  
+%
+% The associated initial condition takes the form $C(t=0)=C_0$ where $C_0$
+% $[\mathrm{ML}^{-3}]$ is the initial solute concentration.
+%
+% The following analytical solution to this problem can be obtained by 
+% separation of variables followed by direct integration:
+%
+% $$ C=C_0\exp(-\lambda t) $$
+%
+% In this exercise we will solve this problem using a first-order explicit
+% time-stepping scheme and then using the MATLAB solver, |ode45|.
+%
+%% Solution by first-order explicit time-stepping
+%
+% The simplest way to solve this problem is to use a first-order
+% explicit time-stepping scheme.
+%
+% First we will discrete the time, $t$, into a sequence of
+% time-steps of interval $\Delta t$. Let $C_n$ denote the concentration at
+% time, $t_n$. A discrete approximation of the ODE above can be written as follows
+%
+% $$\displaystyle  \frac{C_{n+1}-C_{n}}{\Delta t}=-\lambda C_{n} $$
+%
+% which when solved for $C_{n+1}$ takes the form
+%
+% $$ C_{n+1}=(1-\Delta t\lambda )C_{n} $$
+%
+% Create a new script-file and type the following to evaluate and compare the
+% first-order explicit solution and the associated analytical solution:
+%
+%   function MATLABsession5_Assignment
+%   %Solves the decay equation analytically, using Euler explicit time-stepping
+%   %
+%   % tHalf (years) - Half life of Caesium-137
+%   % C0 (ppb) - Initial mass fraction of Caesium-137
+%   % lambda (1/years) - Decay coefficient
+%   % t (years) - Time
+%   
+%   %Define model parameters
+%   tHalf=30;
+%   C0=20;
+%   %Calculate decay coefficient
+%   lambda=log(2)/tHalf;
+%   %Define times of interest
+%   t=linspace(0,100,20)';
+%   
+%   %Solve using first-order explicit time-stepping
+%   
+%   %Define time-step
+%   dt=t(2)-t(1);
+%   %Initialize solution vector
+%   C=zeros(size(t));
+%   %Set the initial condition
+%   C(1)=C0;
+%   %Step through explicit time-stepping sequence
+%   for n=1:numel(t)-1;
+%       C(n+1,1)=(1-dt*lambda)*C(n,1);    
+%   end
+%   
+%   %Evaluate an analytical solution for comparison purposes
+%   Ca=C0*exp(-lambda*t);
+%   
+%   %Plot results
+%   figure(1)
+%   plot(t,Ca,t,C,'o')
+%   xlabel('Time (years)')
+%   ylabel('Caesium-137 concentration (ppb)')
+%   legend('Analytical','First-order explicit')
+%
+%% Re-casting the problem in terms of an ODE function
+%
+% A more general way to think about the explicit time-stepping scheme is to 
+% consider that
+%
+% $$\displaystyle  C_{n}=\left.\frac{dC}{dt}\right|_{n}\Delta t+C_{n-1} $$
+%
+% where in this case
+%
+% $$\displaystyle  \left.\frac{dC}{dt}\right|_{n}=-\lambda C_n $$
+%
+% Modify your existing code to better  emphasise this idea.
+%
+% This can be done by writing:
+%
+%   %Step through explicit time-stepping sequence
+%   for n=1:numel(t)-1;
+%       dCdt=-lambda*C(n,1);
+%       C(n+1,1)=dCdt*dt+C(n,1);
+%   end
+%
+%% Introducing the concept of an ODE solver
+%
+% Now we are going to modify the code such that the explicit
+% time-stepping takes place in a subfunction called |MYsolver| and the
+% ordinary differential equation is contained within a subfunction called
+% |MYodefun|.
+%
+%   function MATLABsession5_Assignment
+%   %Solves the decay equation analytically, using Euler explicit
+%   %time-stepping.
+%
+%   % tHalf (years) - Half life of Caesium-137
+%   % C0 (ppb) - Initial mass fraction of Caesium-137
+%   % lambda (1/years) - Decay coefficient
+%   % t (years) - Time
+%
+%   %Define model parameters
+%   tHalf=30;
+%   C0=20;
+%
+%   %Calculate decay coefficient
+%   lambda=log(2)/tHalf;
+%
+%   %Define times of interest
+%   t=linspace(0,100,20)';
+%
+%   %Solve using first-order explicit time-stepping
+%   [t,C]=MYsolver(@MYodefun,t,C0,lambda);
+%
+%   %Evaluate an analytical solution for comparison purposes
+%   Ca=C0*exp(-lambda*t);
+%
+%   %Plot results
+%   figure(1)
+%   plot(t,Ca,t,C,'o')
+%   xlabel('Time (years)')
+%   ylabel('Caesium-137 concentration (ppb)')
+%   legend('Analytical','First-order explicit')
+%   
+%   %**************************************************************************
+%   
+%   function dCdt=MYodefun(t,C,lambda)
+%   %The first-order decay equation
+%   dCdt=-lambda*C;
+%   
+%   %**************************************************************************
+%   
+%   function [t,f]=MYsolver(odefun,t,f0,p1)
+%   % odefun - contains the name of the subfunction containing the ODE function
+%   % t - a vector containing the times to be solved for.
+%   % f0 - initial condition of f
+%   % p1 - a parameter in the ODE
+%   % f - a vector containing the solution
+%   
+%   %Initialize solution vector
+%   f=zeros(size(t));
+%   %Set the initial condition
+%   f(1)=f0;
+%   %Step through explicit time-stepping sequence
+%   for n=1:numel(t)-1;
+%       %Obtain an estimate of the derivative using the ODE function
+%       dfdt=odefun(t(n,1),f(n,1),p1);
+%       %Define time-step
+%       dt=t(n+1)-t(n);
+%       %Evaluate y for the current time-step
+%       f(n+1,1)=dfdt*dt+f(n,1);    
+%   end
+%
+% The subfunction |MYsolver| is designed to solve an ODE, |odefun|, with initial
+% condition, y0, by first-order explicit time-stepping. This command 
+% is useful if you do not already know the name of the function to be used. 
+% The function name is specified through function handle specified
+% in |odefun|. All the subsequent parameters in the |odefun| input
+% arguments are carried forward to the function specified by |odefun|, which
+% in this case is |MYodefun|.
+%
+% Note that in the main function the codes
+% states that
+%
+%   [t,C]=MYsolver(@MYodefun,t,C0,lambda);
+%
+% Where it says |@MYodefun|, we are telling MYsolver that 
+% |odefun=@MYodefun|.
+% 
+% The implications are that when we state
+%
+%   dfdt=odefun(t(n,1),f(n,1),p1);
+%
+% MATLAB will interpret this as meaning
+%
+%   dfdt=MYodefun(t(n,1),f(n,1),p1);
+%
+% If instead we said |odefun=@simon|, then MATLAB would intepret this as
+% leading to
+%
+%   dfdt=simon(t(n,1),f(n,1),p1);
+%
+% Read about the MATLAB help files about function 
+% handles to learn more about this.
+% 
+% With the code as stated, we can change which problem we are solving by
+% applying a different ODE function. Similarly, we can change the way we are
+% solving the differential equation by applying a different solver. 
+%
+%% Application of MATLAB's ODE45
+% 
+% MATLAB has a number of different ODE solvers to choose from. |ode45|
+% represents the first ODE solver one might consider using.
+%
+% Consider the following Taylor expansion for a function, $$ f(t) $$:
+%
+% $$\displaystyle  f(t+\Delta t) = f(t) + \Delta t \frac{d f}{dt}+\frac{\Delta
+% t^2}{2!}\frac{d^2 f}{dt^2}+\frac{\Delta
+% t^3}{3!}\frac{d^3 f}{dt^3}+O(\Delta t^4) $$
+% 
+% Solving for $df/dt$ it can be seen that
+%
+% $$ \displaystyle \frac{df}{dt}=\frac{f(t+\Delta t) - f(t)}{\Delta t} + O(\Delta t) $$
+%
+% which is the basic finite difference approximation for a derivative we 
+% used previously for our first-order time-stepping scheme.
+%
+% From the Taylor series it is clear that the truncation error
+% associated with this approximation is of the order of $\Delta t$.
+% Consequently, this approximation is often referred to as being
+% first-order accurate.
+%
+% By manipulating the Taylor series it is possible derive increasingly 
+% more accurate approximations of the first-order derivative. There are
+% many differnt methodologies to achieve this. A particularly popular
+% method is the so-called Runge-Kutta method.
+% 
+% MATLAB's solver, |ode45|, has an adaptive time stepping routine. The solver repeats
+% its calculations with successively smaller time-steps until the error
+% between two results, generated using Runge-Kutta 4th (which is 4th order accurate)
+% and Runge-Kutta 5th (which is 5th order accurate) methods, is below a 
+% pre-defined error tolerance; hence the name |ode45|. 
+% This process is illustrated further in the
+% flowchart below.
+%
+% <<ODE45flowchart.png>>
+%
+% The advantage of such an approach
+% is that the solver is able to take much larger time-steps when not much
+% activity is happening, whilst maintaing the same accuracy
+% throughout the simulation. As a result, |ode45| is able to compute
+% solutions much faster than conventional first-order explicit time-stepping
+% schemes without compromising accuracy.
+%
+% Read the help file about |ode45|. Now modify your |MATLABsession5_Assignment| script such that 
+% the decay problem, discussed earlier,
+% is also solved using |ode45|.  This can
+% be done by adding the following code:
+% 
+%   %Solve using ODE45
+%   options=[];
+%   [t,Code45]=ode45(@MYodefun,t,C0,options,lambda);
+%
+% Note that in the above example we are not changing any of the available 
+% options associated with |ode45|. You can learn more about the options 
+% available by studying the help file for |odeset|.
+% 
+% Use a plot to compare your results with
+% the first-order explicit solution and the analytical solution.
+%
+% Also note that the |t| vector simply contains the time we require
+% solution values at. The times in the |t| vector have nothing to do with
+% the actual time-steps that are used. See what happens if you set
+%
+%   t=[0 50 100]';
+%
+% An example MATLAB code, containing all of the instructions requested
+% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession5_Assignment.m MATLABsession5_Assignment.m>.
+ 
+
+##### SOURCE END #####
+--></body></html>
