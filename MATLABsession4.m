@@ -333,7 +333,7 @@ Fcumtrapz=Fcumtrapz-Fcumtrapz(1,1)+3
 % where possible. You may find www.wolframalpha.com useful in this respect.
 % 
 % An example MATLAB code, containing all of the instructions requested
-% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession4_Assignment.m MATLABsession4_Assignment.m>.
+% above, is given in <https://github.com/samathiasuk/MATLABnotes/blob/main/MATLABsession4_Assignment.m MATLABsession4_Assignment.m>.
  
  
 
