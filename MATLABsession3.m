@@ -518,4 +518,4 @@ legend('Empirical','Theoretical')
 % maximum temperature using an additional subfunction.
 %
 % An example MATLAB code, containing all of the instructions requested
-% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession3_Assignment.m MATLABsession3_Assignment.m>.
+% above, is given in <https://github.com/samathiasuk/MATLABnotes/blob/main/MATLABsession3_Assignment.m MATLABsession3_Assignment.m>.
