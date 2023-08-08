@@ -296,5 +296,5 @@
 %   t=[0 50 100]';
 %
 % An example MATLAB code, containing all of the instructions requested
-% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession5_Assignment.m MATLABsession5_Assignment.m>.
+% above, is given in <https://github.com/samathiasuk/MATLABnotes/blob/main/MATLABsession5_Assignment.m MATLABsession5_Assignment.m>.
  
