@@ -162,7 +162,7 @@ t^3}{3!}\frac{d^3 f}{dt^3}+O(\Delta t^4) </script></p><p>Solving for <span class
 options=[];
 [t,Code45]=ode45(@MYodefun,t,C0,options,lambda);
 </pre><p>Note that in the above example we are not changing any of the available options associated with <tt>ode45</tt>. You can learn more about the options available by studying the help file for <tt>odeset</tt>.</p><p>Use a plot to compare your results with the first-order explicit solution and the analytical solution.</p><p>Also note that the <tt>t</tt> vector simply contains the time we require solution values at. The times in the <tt>t</tt> vector have nothing to do with the actual time-steps that are used. See what happens if you set</p><pre class="language-matlab">t=[0 50 100]';
-</pre><p>An example MATLAB code, containing all of the instructions requested above, is given in <a href="https://samathiasuk.github.io/MATLABnotes/MATLABsession5_Assignment.m">MATLABsession5_Assignment.m</a>.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+</pre><p>An example MATLAB code, containing all of the instructions requested above, is given in <a href="https://github.com/samathiasuk/MATLABnotes/blob/main/MATLABsession5_Assignment.m">MATLABsession5_Assignment.m</a>.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% MATLAB Notes: Session 5 - MATLAB's ODE solvers
 %
@@ -462,7 +462,7 @@ options=[];
 %   t=[0 50 100]';
 %
 % An example MATLAB code, containing all of the instructions requested
-% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession5_Assignment.m MATLABsession5_Assignment.m>.
+% above, is given in <https://github.com/samathiasuk/MATLABnotes/blob/main/MATLABsession5_Assignment.m MATLABsession5_Assignment.m>.
  
 
 ##### SOURCE END #####
