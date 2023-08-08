@@ -428,6 +428,6 @@ axis([2000 2013 -5 25])
 % than one worksheet.
 %
 % An example MATLAB code, containing all of the instructions requested
-% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession1_Assignment.m MATLABsession1_Assignment.m>.
+% above, is given in <https://github.com/samathiasuk/MATLABnotes/blob/main/MATLABsession1_Assignment.m MATLABsession1_Assignment.m>.
 
 
