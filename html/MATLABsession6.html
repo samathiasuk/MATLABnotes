@@ -194,7 +194,7 @@ z(z&lt;0)=0;
 F=(erfc(sqrt(P/4./z).*(1-z))+exp(P).*erfc(sqrt(P/4./z).*(1+z)))/2;
 ind=P&gt;700;
 F(ind)=erfc(sqrt(P(ind)/4./z(ind)).*(1-z(ind)))/2;
-</pre><p>Generate a plot of solute concentration against distance for 0, 2, 4 and 6 days. Compare the results from your finite difference code with those from the analytical solution.</p><p>You should find there is almost a perfect correspondence between the finite difference code and the analytical solution. Now reduce the dispersion coefficient by a factor of 20. What happens and why?</p><p>An example MATLAB code, containing all of the instructions requested above, is given in <a href="https://samathiasuk.github.io/MATLABnotes/MATLABsession6_Assignment.m">MATLABsession6_Assignment.m</a>.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+</pre><p>Generate a plot of solute concentration against distance for 0, 2, 4 and 6 days. Compare the results from your finite difference code with those from the analytical solution.</p><p>You should find there is almost a perfect correspondence between the finite difference code and the analytical solution. Now reduce the dispersion coefficient by a factor of 20. What happens and why?</p><p>An example MATLAB code, containing all of the instructions requested above, is given in <a href="https://github.com/samathiasuk/MATLABnotes/blob/main/MATLABsession6_Assignment.m">MATLABsession6_Assignment.m</a>.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% MATLAB Notes: Session 6 - Solving PDEs using ODE solvers
 %
@@ -665,7 +665,7 @@ F(ind)=erfc(sqrt(P(ind)/4./z(ind)).*(1-z(ind)))/2;
 % dispersion coefficient by a factor of 20. What happens and why?
 %
 % An example MATLAB code, containing all of the instructions requested
-% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession6_Assignment.m MATLABsession6_Assignment.m>.
+% above, is given in <https://github.com/samathiasuk/MATLABnotes/blob/main/MATLABsession6_Assignment.m MATLABsession6_Assignment.m>.
  
 
 ##### SOURCE END #####
