@@ -467,5 +467,5 @@
 % dispersion coefficient by a factor of 20. What happens and why?
 %
 % An example MATLAB code, containing all of the instructions requested
-% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession6_Assignment.m MATLABsession6_Assignment.m>.
+% above, is given in <https://github.com/samathiasuk/MATLABnotes/blob/main/MATLABsession6_Assignment.m MATLABsession6_Assignment.m>.
  
