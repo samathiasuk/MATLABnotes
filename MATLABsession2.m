@@ -396,4 +396,4 @@ end
 % to the previous two tasks.
 %
 % An example MATLAB code, containing all of the instructions requested
-% above, is given in <https://samathiasuk.github.io/MATLABnotes/MATLABsession2_Assignment.m MATLABsession2_Assignment.m>.
+% above, is given in <https://github.com/samathiasuk/MATLABnotes/blob/main/MATLABsession2_Assignment.m MATLABsession2_Assignment.m>.
