@@ -71,11 +71,3 @@ xlabel('Porosity [frac]')
 ylabel('Permeability [mD]')
 legend('Bunter Sandstone','Rotliegend Sandstone','Carboniferous Sandstone',...
     'Jurassic Shale','Rotliegend Shale','Carboniferous Shale','location','northwest')
-
-
-
-
-
-
-
-
